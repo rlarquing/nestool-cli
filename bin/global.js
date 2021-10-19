@@ -14,9 +14,7 @@ const { dtos } = require("../lib/dtos.js");
 (async () => {
   myLibrary.msn("NESTOOL-CLI");
 
-  let opt = "";
-  //do {
-  opt = await menu();
+  let opt = await menu();
   switch (opt.opcion) {
     case "modulo":
       myLibrary.estructura(await myLibrary.queryParams());
@@ -38,5 +36,4 @@ const { dtos } = require("../lib/dtos.js");
     case "entity":
       break;
   }
-  //} while (opt !== 'exit')
 })();
