@@ -12,7 +12,7 @@ const { dtos } = require("../lib/dtos.js");
 
 // Crea la estructura de carpetas.
 (async () => {
-  myLibrary.msn("TOOL-KIT-CLI");
+  myLibrary.msn("NESTOOL-CLI");
 
   let opt = "";
   //do {
