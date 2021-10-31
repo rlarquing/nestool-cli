@@ -1,5 +1,4 @@
-module.exports=`
-import {Injectable} from '@nestjs/common';
+module.exports=`import {Injectable} from '@nestjs/common';
 import {$nameEntity} from '../entity';
 import {$nameRepository} from "../repository";
 import {$nameMapper} from "../mapper";
@@ -13,6 +12,6 @@ export class $nameService extends GenericService<$nameEntity> {
         protected $nameParamMapper: $nameMapper,
         protected trazaService: TrazaService,
     ) {
-        super($nameParamRepository, $nameParamMapper, trazaService, true);
+        super($nameParamRepository, $nameParamMapper, trazaService, $traza);
     }
 }`;

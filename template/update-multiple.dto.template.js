@@ -1,5 +1,4 @@
-module.exports=`
-import {IsNotEmpty, $validadores} from "class-validator";
+module.exports=`import {$validadores} from "class-validator";
 import {ApiProperty} from "@nestjs/swagger";
 export class UpdateMultiple$nameDto {
 

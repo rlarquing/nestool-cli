@@ -6,9 +6,12 @@
 // Recuperar el primer argumento
 // var name = args[0];
 
-var myLibrary = require("../lib/index.js");
-const { menu } = require("../lib/menu.js");
-const { dtos } = require("../lib/dtos.js");
+var myLibrary = require("../lib/index");
+const { menu } = require("../lib/menu");
+const { dtos } = require("../lib/dtos");
+const { service } = require("../lib/service");
+const { repository } = require("../lib/repository");
+const { controller } = require("../lib/controller");
 
 // Crea la estructura de carpetas.
 (async () => {
@@ -21,6 +24,7 @@ const { dtos } = require("../lib/dtos.js");
       break;
 
     case "controlador":
+      controller();
       break;
 
     case "dtos":
@@ -28,12 +32,16 @@ const { dtos } = require("../lib/dtos.js");
       break;
 
     case "service":
+      service();
       break;
     case "mapper":
       break;
     case "repository":
+      repository();
       break;
     case "entity":
+      break;
+    case "crud":
       break;
   }
 })();
