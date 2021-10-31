@@ -19,6 +19,14 @@ const buscar = (file) => {
     }
     return false;
 }
+const buscarCarpeta = (folder) => {
+    for (const dir of dirFolders) {
+        if (dir.indexOf(folder) !== -1) {
+            return true;
+        }
+    }
+    return false;
+}
 const direccionCarpeta = (nombre) => {
     let direccion;
     for (const dir of dirFolders) {
@@ -72,6 +80,7 @@ const escribirFichero = (filePath, fichero) => {
 
 module.exports = {
     buscar,
+    buscarCarpeta,
     eliminarDuplicado,
     direccionCarpeta,
     direccionFichero,
