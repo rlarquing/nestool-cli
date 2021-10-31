@@ -1,8 +1,9 @@
 module.exports=`
 import {Column, Entity, $typeorm} from "typeorm";
 import {GenericEntity} from "../../shared/entity";
+$import
 
-@Entity('$name', { schema: '$schema' })
+@Entity('$entidad', { schema: '$schema' })
 export class $nameEntity extends GenericEntity {
 
     $atriburos

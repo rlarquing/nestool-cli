@@ -77,7 +77,9 @@ const escribirIndex = (filePath, exportaciones) => {
 const escribirFichero = (filePath, fichero) => {
     fs.writeFileSync(filePath, fichero, {mode: 0o777});
 }
-
+const escapeRegExp = (string) => {
+    return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
 module.exports = {
     buscar,
     buscarCarpeta,
@@ -86,5 +88,6 @@ module.exports = {
     direccionFichero,
     thisAtributos,
     escribirIndex,
-    escribirFichero
+    escribirFichero,
+    escapeRegExp
 };

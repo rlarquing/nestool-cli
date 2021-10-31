@@ -4,23 +4,23 @@ import {$nameService} from '../service';
 import {GetUser, $namees} from "../decorator";
 import {$nameType} from "../enum/roltype.enum";
 import {AuthGuard} from "@nestjs/passport";
-import {$nameGuard} from "../guard/rol.guard";
 import {$nameEntity, UserEntity} from "../entity";
 import {ConfigService} from "@atlasjs/config";
 import {ApiBearerAuth, ApiBody, ApiNotFoundResponse, ApiOperation, ApiResponse, ApiTags} from "@nestjs/swagger";
 import {GenericController} from "../../shared/controller";
 import {BadRequestDto, BuscarDto, FiltroGenericoDto, ListadoDto, ResponseDto} from "../../shared/dto";
+$import
 
-@ApiTags('$nameTag')
-@Controller('$nameParam')
-@UseGuards(AuthGuard('jwt'), $nameGuard)
+@ApiTags('$tag')
+@Controller('$param')
+@UseGuards(AuthGuard('jwt'), RolGuard)
 @ApiBearerAuth()
 export class $nameController extends GenericController<$nameEntity> {
     constructor(
-        protected $nameParamService: $nameService,
+        protected $paramService: $nameService,
     protected configService: ConfigService
 ) {
-    super($nameParamService, configService, '$nameParam');
+    super($paramService, configService, '$param');
 }
 
 @Get()

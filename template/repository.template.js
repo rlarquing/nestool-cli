@@ -8,8 +8,8 @@ import { $nameEntity } from "../entity";
 @Injectable()
 export class $nameRepository extends GenericRepository<$nameEntity> implements IRepository<$nameEntity>{
     constructor( @InjectRepository($nameEntity)
-                 private $nameParamRepository: Repository<$nameEntity>){
-        super($nameParamRepository);
+                 private $paramRepository: Repository<$nameEntity>){
+        super($paramRepository);
     }
 
 }`;

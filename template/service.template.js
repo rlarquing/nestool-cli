@@ -8,10 +8,10 @@ import {GenericService} from "../../shared/service";
 @Injectable()
 export class $nameService extends GenericService<$nameEntity> {
     constructor(
-        protected $nameParamRepository: $nameRepository,
-        protected $nameParamMapper: $nameMapper,
+        protected $paramRepository: $nameRepository,
+        protected $paramMapper: $nameMapper,
         protected trazaService: TrazaService,
     ) {
-        super($nameParamRepository, $nameParamMapper, trazaService, $traza);
+        super($paramRepository, $paramMapper, trazaService, $traza);
     }
 }`;
