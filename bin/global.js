@@ -21,7 +21,7 @@ const {entity} = require("../lib/entity");
     let opt = await menu();
     switch (opt.opcion) {
         case "modulo":
-            await estructura(queryParams());
+            await estructura(await queryParams());
             break;
 
         case "controlador":
