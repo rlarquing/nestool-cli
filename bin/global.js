@@ -12,6 +12,7 @@ const {dtos} = require("../lib/dtos");
 const {service} = require("../lib/service");
 const {repository} = require("../lib/repository");
 const {controller} = require("../lib/controller");
+const {entity} = require("../lib/entity");
 
 // Crea la estructura de carpetas.
 (async () => {
@@ -40,6 +41,7 @@ const {controller} = require("../lib/controller");
             await repository();
             break;
         case "entity":
+            await entity();
             break;
         case "crud":
             break;
