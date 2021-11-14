@@ -1,1 +1,2 @@
-module.exports=`@OneToMany(() => $nameEntity, ($name) => $name.$atributo)`;
+module.exports=`@OneToMany(() => $entity, ($name) => $name.$nAtributo)
+$atributo`;

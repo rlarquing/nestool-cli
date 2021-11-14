@@ -1,5 +1,6 @@
 module.exports=`
-@ManyToOne(() => $nameEntity, ($name) => $name.$atributos, {
+@ManyToOne(() => $entity, ($name) => $name.$nAtributos, {
     onDelete: 'CASCADE',
 })
-@JoinColumn({name: '$name_id'})`;
+@JoinColumn({name: '$name_id'})
+$atributo`;

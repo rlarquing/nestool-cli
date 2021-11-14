@@ -1,7 +1,8 @@
-const destino=` @ManyToMany((type) => $nameEntity, ($name) => $name.$atributo)
-  @JoinColumn()`;
+const destino=` @ManyToMany(() => $entity, ($entidad) => $entidad.$nAtributo)
+  @JoinColumn()
+  $atributo`;
 const origen=`
-@ManyToMany((type) => $nameEntity, ($name) => $name.$atributos,{eager: false})
+@ManyToMany(() => $entity, ($entidad) => $entidad.$nAtributos,{eager: false})
 @JoinTable({name: '$name_$entidad',
     joinColumn: {
         name: "$name_id",
@@ -10,5 +11,6 @@ const origen=`
     inverseJoinColumn: {
         name: "$entidad_id",
         referencedColumnName: "id"
-    }})`;
+    }})
+    $atributo`;
 module.exports={origen,destino}
