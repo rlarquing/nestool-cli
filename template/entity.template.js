@@ -6,7 +6,7 @@ $import
 @Entity('$entidad', { schema: '$schema' })
 export class $nameEntity extends GenericEntity {
 
-    $atriburos
+    $atributos
 
     constructor($parametros) {
         super();

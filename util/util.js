@@ -1,8 +1,9 @@
 const fs = require("fs");
 const inquirer = require("inquirer");
 const chalk = require("chalk");
+const ruta = require("path");
 const pathBase = process.cwd();
-const finder = require("findit")(pathBase + "\\src\\");
+const finder = require("findit")(ruta.normalize(pathBase + "/src/"));
 
 let dirFiles = [];
 let dirFolders = [];
