@@ -13,6 +13,7 @@ const {service} = require("../lib/service");
 const {repository} = require("../lib/repository");
 const {controller} = require("../lib/controller");
 const {entity} = require("../lib/entity");
+const {formatearArchivos} = require("../util/util");
 
 // Crea la estructura de carpetas.
 (async () => {
@@ -46,5 +47,6 @@ const {entity} = require("../lib/entity");
         case "crud":
             break;
     }
+    await formatearArchivos();
     process.exit(1);
 })();

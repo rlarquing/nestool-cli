@@ -2,8 +2,10 @@ const fs = require("fs");
 const inquirer = require("inquirer");
 const chalk = require("chalk");
 const ruta = require("path");
+const util = require("util");
 const pathBase = process.cwd();
 const finder = require("findit")(ruta.normalize(pathBase + "/src/"));
+const exec = util.promisify(require("child_process").exec);
 
 let dirFiles = [];
 let dirFolders = [];
@@ -56,6 +58,16 @@ const direccionFichero = (nombre) => {
 
 const direccionCarpeta = (nombre) => {
     return findElemento(dirFolders, nombre);
+}
+
+const direccionClassBusquedaInterna = (nombre) => {
+    for (let dirFile of dirFiles) {
+        let fichero = fs.readFileSync(dirFile, 'utf8');
+        if (fichero.indexOf(`class ${nombre}`) !== -1) {
+            return dirFile;
+        }
+    }
+    return -1;
 }
 
 const eliminarDuplicado = (array) => {
@@ -229,7 +241,7 @@ function generarColumna(answer) {
 }
 
 
-const transformar = (objetivo, patronAReconocer, patronAAplicar ) => {
+const transformar = (objetivo, patronAReconocer, patronAAplicar) => {
     // Es ua variable si comienza con % y no tiene espacios.
     function esUnaVariable(expr) {
         if (!expr) {
@@ -243,10 +255,8 @@ const transformar = (objetivo, patronAReconocer, patronAAplicar ) => {
         if (apa.charAt(0) !== '%') {
             return false;
         }
-        if (apa.charAt(1) === ' ') {
-            return false;
-        }
-        return true;
+        return apa.charAt(1) !== ' ';
+
     }
 
     // verdadero si el cáracter es un número.
@@ -404,6 +414,10 @@ const transformar = (objetivo, patronAReconocer, patronAAplicar ) => {
     return resultado;
 }
 
+const formatearArchivos = async () => {
+   await exec(`npm run format`);
+};
+
 module.exports = {
     preguntar,
     buscarFichero,
@@ -424,5 +438,8 @@ module.exports = {
     aInicialMayuscula,
     aInicialMinuscula,
     generarColumna,
-    transformar
+    transformar,
+    direccionClassBusquedaInterna,
+    right,
+    formatearArchivos
 };
