@@ -21,11 +21,18 @@ const preguntar = async (questions) => {
     let answers;
     do {
         answers = await inquirer.prompt(questions);
-        output.push(answers);
+        if (!encuentra(output, answers, 'nombreAtributo')) {
+            output.push(answers);
+        } else {
+            console.log(chalk.bold.red("\nEl atributo ya existe."));
+            answers.askAgain=true;
+        }
     } while (answers.askAgain);
     return output;
 };
-
+const encuentra = (array, elem, field) => {
+    return array.some((item) => item[field] === elem[field]);
+};
 const find = (lista, elemento) => {
     for (const item of lista) {
         if (item.indexOf(elemento) !== -1) {
@@ -415,7 +422,7 @@ const transformar = (objetivo, patronAReconocer, patronAAplicar) => {
 }
 
 const formatearArchivos = async () => {
-   await exec(`npm run format`);
+    await exec(`npm run format`);
 };
 
 module.exports = {
