@@ -3,6 +3,28 @@ const {buscarFichero, buscarCarpeta} = require("../util/util");
 const ruta = require("path");
 const pathBase = process.cwd();
 let pathTmp = '';
+const preg={
+    name: "moduleName",
+    type: "input",
+    message: "Escribe el nombre del módulo:",
+    validate: async (input) => {
+        await new Promise((r) => setTimeout(r, 1000));
+        if (input === "") {
+            console.log(
+                chalk.bold.red("\nTiene que escribir el nombre del módulo.")
+            );
+            return;
+        }
+        pathTmp = ruta.normalize(`${pathBase}/src/${input}`);
+        if (!buscarCarpeta(pathTmp)) {
+            console.error(
+                chalk.bold.red(`\nNo existe el módulo con nombre: ${input}`)
+            );
+            return;
+        }
+        return true;
+    },
+};
 const preguntaBase = async (...pregunta) => {
     let preguntas = [{
         name: "moduleName",
@@ -49,4 +71,4 @@ const preguntaBase = async (...pregunta) => {
     }
     return preguntas;
 };
-module.exports = {preguntaBase};
+module.exports = {preguntaBase,preg};

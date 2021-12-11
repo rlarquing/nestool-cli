@@ -5,19 +5,41 @@ let atributos = [];
 let pendienteAnalisis = '';
 let clase = '';
 let restoClase = [];
+let constructor = [];
+let importNew = [];
 
 function procesarLineaDeComandos() {
     // Aquí es cuando parseo
     // ignoro el constructor
-    let nombreEsquema;
     if (comienzaCon(pendienteAnalisis, 'import')) {
         importaciones.push(pendienteAnalisis);
+    }
+    if (comienzaCon(pendienteAnalisis, 'import')) {
+        if (pendienteAnalisis.includes('typeorm')) {
+            let parametros = pendienteAnalisis.substring(pendienteAnalisis.indexOf('{') + 1, pendienteAnalisis.indexOf('}'));
+            pendienteAnalisis = pendienteAnalisis.replace(parametros, parametros + ', $typeorm');
+        }
+        importNew.push(pendienteAnalisis);
     }
     if (!comienzaCon(pendienteAnalisis, '@Entity(') && comienzaCon(pendienteAnalisis, '@')) {
         atributos.push(pendienteAnalisis);
     }
-    if (comienzaCon(pendienteAnalisis, 'constructor') || comienzaCon(pendienteAnalisis, 'this') || comienzaCon(pendienteAnalisis, '}')) {
+    if (comienzaCon(pendienteAnalisis, 'constructor') || comienzaCon(pendienteAnalisis, 'this.') || comienzaCon(pendienteAnalisis, '}')) {
         restoClase.push(pendienteAnalisis);
+    }
+    if (comienzaCon(pendienteAnalisis, 'constructor')) {
+        let parametros = pendienteAnalisis.substring(pendienteAnalisis.indexOf('(') + 1, pendienteAnalisis.indexOf(')'));
+        pendienteAnalisis = pendienteAnalisis.replace(parametros, parametros + ', $parametros');
+        constructor.push(pendienteAnalisis);
+    }
+    if (comienzaCon(pendienteAnalisis, 'this.')) {
+        constructor.push(pendienteAnalisis);
+    }
+    if (comienzaCon(pendienteAnalisis, '}')) {
+        if (restoClase[restoClase.length - 1].includes('this.')) {
+            pendienteAnalisis = pendienteAnalisis.replace('}', '$thisAtributos}');
+        }
+        constructor.push(pendienteAnalisis);
     }
     if (comienzaCon(pendienteAnalisis, '@Entity(')) {
         clase = pendienteAnalisis;
@@ -41,11 +63,16 @@ function leerProximaLinea(datos) {
 }
 
 function parseEntidad() {
-
+    importNew.push('$import');
+    let atributosNew = atributos.slice();
+    atributosNew.push('$atributos');
     return {
         import: importaciones,
-        atributos,
+        importNew,
         clase,
+        atributos,
+        atributosNew,
+        constructor,
         restoClase
     }
 }
