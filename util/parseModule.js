@@ -1,12 +1,8 @@
 const {comienzaCon, right} = require("./util");
 const LineReaderSync = require("line-reader-sync");
 let importaciones = [];
-let atributos = [];
 let pendienteAnalisis = '';
-let clase = '';
 let restoClase = [];
-let imports = [];
-let importNew = [];
 
 function procesarLineaDeComandos() {
     // Aquí es cuando parseo
@@ -14,20 +10,13 @@ function procesarLineaDeComandos() {
     if (comienzaCon(pendienteAnalisis, 'import')) {
         importaciones.push(pendienteAnalisis);
     }
-    if (comienzaCon(pendienteAnalisis, 'imports')) {
-        imports.push(pendienteAnalisis);
-    }
-    // if (comienzaCon(pendienteAnalisis, 'import')) {
-    //     if (pendienteAnalisis.includes('typeorm')) {
-    //         let parametros = pendienteAnalisis.substring(pendienteAnalisis.indexOf('{') + 1, pendienteAnalisis.indexOf('}'));
-    //         pendienteAnalisis = pendienteAnalisis.replace(parametros, parametros + ', $typeorm');
-    //     }
-    //     importNew.push(pendienteAnalisis);
-    // }
-    if (comienzaCon(pendienteAnalisis, 'controllers') || comienzaCon(pendienteAnalisis, 'providers.') || comienzaCon(pendienteAnalisis, 'exports') || comienzaCon(pendienteAnalisis, 'export class')) {
+    if (comienzaCon(pendienteAnalisis, '@Module')) {
         restoClase.push(pendienteAnalisis);
     }
 
+    if (comienzaCon(pendienteAnalisis, '}')) {
+        restoClase.push(pendienteAnalisis);
+    }
 
 
     // flush, vacío el buffer hasta que encuentre un ;
@@ -35,29 +24,36 @@ function procesarLineaDeComandos() {
 
 }
 
-// ManyToOne y OneToOne, uno a muchos no es necesario...
 
 // Este parsea linea a linea, pero antes se debe crear un nuevoParseo() para reinicializar...
 function leerProximaLinea(datos) {
     datos = datos.trim();
     pendienteAnalisis += datos;
     //No parsea hasta que encuentre un punto y coma
-    console.log(right(pendienteAnalisis, 2));
-    if (right(pendienteAnalisis, 2) !== ' ],') {
+    if (right(pendienteAnalisis, 1) !== ';') {
         return;
     }
-
 
     return procesarLineaDeComandos();
 }
 
 function parseModulo() {
-    importNew.push('$import');
-    let atributosNew = atributos.slice();
-    atributosNew.push('$atributos');
+    restoClase=restoClase.join('');
+    if (restoClase.includes('TypeOrmModule.forFeature([')) {
+        let entidades = restoClase.substring(restoClase.indexOf('TypeOrmModule.forFeature([') + 1, restoClase.indexOf(']),'));
+        restoClase = restoClase.replace(entidades, entidades + ', $entidad');
+    } else {
+        if (restoClase.includes('imports: [')) {
+            let imports = restoClase.substring(restoClase.indexOf('[') + 1, restoClase.indexOf('],controllers:'));
+            restoClase = restoClase.replace(imports, 'TypeOrmModule.forFeature([$entidad]),' + imports);
+        } else {
+            let imports = restoClase.substring(restoClase.indexOf('(') + 1, restoClase.indexOf(')'));
+            restoClase = restoClase.replace(imports, '{ imports: [TypeOrmModule.forFeature([$entidad]),],}');
+        }
+        importaciones.push("import { TypeOrmModule } from '@nestjs/typeorm';");
+    }
     return {
         import: importaciones,
-        imports,
         restoClase
     }
 }
@@ -73,9 +69,10 @@ const parseM = (dir) => {
         const element = lineas[index];
         leerProximaLinea(element);
     }
+
     procesarLineaDeComandos(); // procesar aunque no terminea en ;
 
-    // te crea algo parecido a una precompilación en resultados con todos los elementos para armar el dto
+
     return parseModulo();
 }
 module.exports = {parseM}
