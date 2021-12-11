@@ -38,20 +38,6 @@ function leerProximaLinea(datos) {
 }
 
 function parseModulo() {
-    restoClase=restoClase.join('');
-    if (restoClase.includes('TypeOrmModule.forFeature([')) {
-        let entidades = restoClase.substring(restoClase.indexOf('TypeOrmModule.forFeature([') + 1, restoClase.indexOf(']),'));
-        restoClase = restoClase.replace(entidades, entidades + ', $entidad');
-    } else {
-        if (restoClase.includes('imports: [')) {
-            let imports = restoClase.substring(restoClase.indexOf('[') + 1, restoClase.indexOf('],controllers:'));
-            restoClase = restoClase.replace(imports, 'TypeOrmModule.forFeature([$entidad]),' + imports);
-        } else {
-            let imports = restoClase.substring(restoClase.indexOf('(') + 1, restoClase.indexOf(')'));
-            restoClase = restoClase.replace(imports, '{ imports: [TypeOrmModule.forFeature([$entidad]),],}');
-        }
-        importaciones.push("import { TypeOrmModule } from '@nestjs/typeorm';");
-    }
     return {
         import: importaciones,
         restoClase
