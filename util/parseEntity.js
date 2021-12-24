@@ -66,8 +66,7 @@ function parseEntidad() {
     importNew.push('$import');
     let atributosNew = atributos.slice();
     atributosNew.push('$atributos');
-    return {
-        import: importaciones,
+    let parse={import: importaciones,
         importNew,
         clase,
         atributos,
@@ -75,7 +74,15 @@ function parseEntidad() {
         constructor,
         restoClase,
         parametros
-    }
+};
+    importaciones=[];
+    importNew=[];
+    atributos=[];
+    atributosNew=[];
+    constructor=[];
+    restoClase=[];
+    return parse;
+
 }
 
 // y este último ya te construye el a partir de un arreglo original

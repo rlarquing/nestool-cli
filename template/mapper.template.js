@@ -23,9 +23,9 @@ return update$nameEntity;
 }
 
 async entityToDto($attrNameEntity: $nameEntity): Promise<Read$nameDto> {
-    const $attrName: $nameEntity = await this.attrNameRepository.findById(attrNameEntity.id);
+    const $attrName: $nameEntity = await this.$attrNameRepository.findById($attrNameEntity.id);
  $analisisentityToDto
-const dtoToString: string = attrNameEntity.toString();
+const dtoToString: string = $attrNameEntity.toString();
 return new Read$nameDto($parametrosentityToDto);
 }
 }
