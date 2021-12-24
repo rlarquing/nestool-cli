@@ -11,6 +11,7 @@ const {menu} = require("../lib/menu");
 const {dtos} = require("../lib/dtos");
 const {service} = require("../lib/service");
 const {repository} = require("../lib/repository");
+const {mapper} = require("../lib/mapper");
 const {controller} = require("../lib/controller");
 const {entity} = require("../lib/entity");
 const {formatearArchivos} = require("../util/util");
@@ -37,6 +38,7 @@ const {formatearArchivos} = require("../util/util");
             await service();
             break;
         case "mapper":
+            await mapper();
             break;
         case "repository":
             await repository();

@@ -33,6 +33,9 @@ const preguntar = async (questions) => {
 const encuentra = (array, elem, field) => {
     return array.some((item) => item[field] === elem[field]);
 };
+const removeFromArr = (arr, item)=> {
+    return arr.filter(e => e !== item);
+}
 const find = (lista, elemento) => {
     for (const item of lista) {
         if (item.indexOf(elemento) !== -1) {
@@ -76,7 +79,12 @@ const direccionClassBusquedaInterna = (nombre) => {
     }
     return -1;
 }
+const busquedaInterna = (dir,nombre) => {
+        let fichero = fs.readFileSync(dir, 'utf8');
+        return fichero.indexOf(nombre) !== -1;
 
+
+}
 const eliminarDuplicado = (array) => {
     let arreglado = [];
     array.forEach((element) => {
@@ -167,13 +175,24 @@ const formatearNombre = (str, separador) => {
     return resultado;
 }
 
+const quitarSeparador = (str, separador) => {
+    if (str.length === 0) {
+        return "";
+    }
+    if(str.indexOf('_')!==-1){
+        separador='_';
+    }
+    let resultado = str.split(separador).map(item=>aInicialMayuscula(item));
+    return resultado.join('');
+}
+
 const capitalize = (str) => {
     let result = str;
     if (result.length > 0) {
-        result = String(result.substr(0, 1)).toLocaleUpperCase();
+        result = result.substr(0, 1).toLocaleUpperCase();
     }
     if (str.length > 1) {
-        result += String(str.substring(1).toLocaleLowerCase());
+        result += str.substring(1).toLocaleLowerCase();
     }
     return result;
 }
@@ -181,10 +200,10 @@ const capitalize = (str) => {
 const aInicialMayuscula = (str) => {
     let result = str;
     if (result.length > 0) {
-        result = String(result.substr(0, 1)).toLocaleUpperCase();
+        result = result.substr(0, 1).toLocaleUpperCase();
     }
     if (str.length > 1) {
-        result += String(str.substring(1));
+        result += str.substring(1);
     }
     return result;
 }
@@ -192,10 +211,10 @@ const aInicialMayuscula = (str) => {
 const aInicialMinuscula = (str) => {
     let result = str;
     if (result.length > 0) {
-        result = String(result.substr(0, 1)).toLocaleLowerCase();
+        result = result.substr(0, 1).toLocaleLowerCase();
     }
     if (str.length > 1) {
-        result += String(str.substring(1));
+        result += str.substring(1);
     }
     return result;
 }
@@ -448,5 +467,9 @@ module.exports = {
     transformar,
     direccionClassBusquedaInterna,
     right,
-    formatearArchivos
+    formatearArchivos,
+    quitarSeparador,
+    busquedaInterna,
+    findElemento,
+    removeFromArr
 };

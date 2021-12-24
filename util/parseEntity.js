@@ -7,7 +7,7 @@ let clase = '';
 let restoClase = [];
 let constructor = [];
 let importNew = [];
-
+let parametros='';
 function procesarLineaDeComandos() {
     // Aquí es cuando parseo
     // ignoro el constructor
@@ -28,7 +28,7 @@ function procesarLineaDeComandos() {
         restoClase.push(pendienteAnalisis);
     }
     if (comienzaCon(pendienteAnalisis, 'constructor')) {
-        let parametros = pendienteAnalisis.substring(pendienteAnalisis.indexOf('(') + 1, pendienteAnalisis.indexOf(')'));
+        parametros = pendienteAnalisis.substring(pendienteAnalisis.indexOf('(') + 1, pendienteAnalisis.indexOf(')'));
         pendienteAnalisis = pendienteAnalisis.replace(parametros, parametros + ', $parametros');
         constructor.push(pendienteAnalisis);
     }
@@ -73,7 +73,8 @@ function parseEntidad() {
         atributos,
         atributosNew,
         constructor,
-        restoClase
+        restoClase,
+        parametros
     }
 }
 
