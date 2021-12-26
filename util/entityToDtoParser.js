@@ -194,7 +194,7 @@ function crearReadDto(moduleName) {
             if (nombreModulo === moduleName) {
                 importaciones.push(`import { Read${quitarSeparador(nombre, '-')}Dto } from './${nombreDto}';`);
             } else if (esNomenclador) {
-                importacion.push(`import { ReadNomencladorDto } from "../../nomenclator/dto";`);
+                importaciones.push(`import { ReadNomencladorDto } from "../../nomenclator/dto";`);
             }else{
                 if (!modulos.hasOwnProperty(nombreModulo)) {
                     modulos[nombreModulo] = {
