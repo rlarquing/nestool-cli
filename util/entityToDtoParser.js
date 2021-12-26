@@ -174,7 +174,7 @@ function crearDto() {
 function crearReadDto(moduleName) {
     dto = [];
     let parametros = [];
-    let impDto = []
+    let impDto = new Map();
     let modulos = {};
     let rutaNomenclador = ruta.normalize(direccionFichero("nomenclador-type.enum.ts"));
     for (let i = 0; i < resultados.length; i++) {
@@ -195,16 +195,14 @@ function crearReadDto(moduleName) {
                 importaciones.push(`import { Read${quitarSeparador(nombre, '-')}Dto } from './${nombreDto}';`);
             } else if (esNomenclador) {
                 importaciones.push(`import { ReadNomencladorDto } from "../../nomenclator/dto";`);
-            }else{
-                if (!modulos.hasOwnProperty(nombreModulo)) {
-                    modulos[nombreModulo] = {
+            } else {
+                if (!modulos.hasOwnProperty('importacion')) {
+                    modulos= {
                         importacion: []
                     }
                 }
-                modulos[nombreModulo].importacion.push({
-                    modulo: `${nombreModulo}`,
-                    dto: `Read${quitarSeparador(nombre, '-')}Dto`
-                });
+                modulos.importacion.push(`Read${quitarSeparador(nombre, '-')}Dto`);
+                impDto.set(nombreModulo,modulos);
 
             }
 
@@ -225,9 +223,11 @@ function crearReadDto(moduleName) {
         }
     }
     let thisAtrib = thisAtributos(parametros);
-
-    console.log(modulos);
-
+    if (impDto.size > 0) {
+        for (const key of impDto.keys()) {
+            importaciones.push(` import { ${impDto.get(key).importacion.toString() }} from '../../${key}/dto';`);
+        }
+    }
     importaciones = eliminarDuplicado(importaciones);
     return {
         import: importaciones.join('\n'),
