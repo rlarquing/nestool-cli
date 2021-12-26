@@ -9,7 +9,7 @@ import { $nameEntity } from "../entity";
 export class $nameRepository extends GenericRepository<$nameEntity> implements IRepository<$nameEntity>{
     constructor( @InjectRepository($nameEntity)
                  private $paramRepository: Repository<$nameEntity>){
-        super($paramRepository);
+        super($paramRepository,[$relations]);
     }
 
 }`;

@@ -13,7 +13,7 @@ import {PermissionGuard} from "../guard";
 $import
 
 @ApiTags('$tag')
-@Controller('$param')
+@Controller('$paramCont')
 @UseGuards(AuthGuard('jwt'), RolGuard, PermissionGuard)
 @ApiBearerAuth()
 @UsePipes(ValidationPipe)
@@ -22,7 +22,7 @@ export class $nameController extends GenericController<$nameEntity> {
         protected $paramService: $nameService,
     protected configService: ConfigService
 ) {
-    super($paramService, configService, '$param');
+    super($paramService, configService, '$paramCont');
 }
 
 @Get()

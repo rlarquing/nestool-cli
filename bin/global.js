@@ -15,6 +15,7 @@ const {mapper} = require("../lib/mapper");
 const {controller} = require("../lib/controller");
 const {entity} = require("../lib/entity");
 const {formatearArchivos} = require("../util/util");
+const {crud} = require("../lib/crud");
 
 // Crea la estructura de carpetas.
 (async () => {
@@ -47,6 +48,7 @@ const {formatearArchivos} = require("../util/util");
             await entity();
             break;
         case "crud":
+            await crud();
             break;
     }
     await formatearArchivos();
