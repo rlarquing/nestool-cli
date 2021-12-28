@@ -4,7 +4,7 @@ const {
     right,
     eliminarDuplicado,
     buscarFichero,
-    thisAtributos, formatearNombre, direccionFichero, aInicialMayuscula, quitarSeparador
+    thisAtributos, formatearNombre, direccionFichero, quitarSeparador
 } = require("./util");
 const ruta = require("path");
 const {busquedaInterna, aInicialMinuscula} = require("../util/util");
@@ -124,6 +124,7 @@ let importaciones = [];
 
 function crearDto() {
     dto = [];
+    importaciones = [];
     let validadores = [];
 
     for (let i = 0; i < resultados.length; i++) {
@@ -173,6 +174,7 @@ function crearDto() {
 // Esta función me crea el read DTO...
 function crearReadDto(moduleName) {
     dto = [];
+    importaciones = [];
     let parametros = [];
     let impDto = new Map();
     let modulos = {};
@@ -197,15 +199,17 @@ function crearReadDto(moduleName) {
                 importaciones.push(`import { ReadNomencladorDto } from "../../nomenclator/dto";`);
             } else {
                 if (!modulos.hasOwnProperty('importacion')) {
-                    modulos= {
+                    modulos = {
                         importacion: []
                     }
                 }
-                modulos.importacion.push(`Read${quitarSeparador(nombre, '-')}Dto`);
-                impDto.set(nombreModulo,modulos);
-
+                if (impDto.has(nombreModulo)){
+                    impDto.set(nombreModulo, impDto.get(nombreModulo).importacion.push(`Read${quitarSeparador(nombre, '-')}Dto`));
+                }else{
+                    modulos.importacion.push(`Read${quitarSeparador(nombre, '-')}Dto`);
+                    impDto.set(nombreModulo, modulos);
+                }
             }
-
 
             dto.push(`@ApiProperty({description: 'Aquí escriba una descripción para el atributo ${resultados[i].atributo}', example: 'Aquí una muestra para ese atributo'})`);
             if (resultados[i].tipoAtributo.includes('[]')) {
@@ -225,7 +229,8 @@ function crearReadDto(moduleName) {
     let thisAtrib = thisAtributos(parametros);
     if (impDto.size > 0) {
         for (const key of impDto.keys()) {
-            importaciones.push(` import { ${impDto.get(key).importacion.toString() }} from '../../${key}/dto';`);
+            let imp = eliminarDuplicado(impDto.get(key).importacion);
+            importaciones.push(` import { ${imp.toString()}} from '../../${key}/dto';`);
         }
     }
     importaciones = eliminarDuplicado(importaciones);

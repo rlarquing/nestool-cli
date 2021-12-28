@@ -1,4 +1,26 @@
-module.exports=`import {Injectable} from '@nestjs/common';
+const mepperSinRelacion=`import {Injectable} from '@nestjs/common';
+import {$nameEntity} from "../entity";
+import {Create$nameDto, ReadA$nameDto, Update$nameaDto} from "../dto";
+
+@Injectable()
+export class $nameMapper {
+
+async dtoToEntity(create$nameDto: Create$nameDto): Promise<$nameEntity> {
+return new $nameEntity($parametrosdtoToEntity);
+}
+
+async dtoToUpdateEntity(update$nameDto: Update$nameDto, update$nameEntity: $nameEntity): Promise<$nameEntity> {
+$analisisdtoToUpdateEntity
+return update$nameEntity;
+}
+
+async entityToDto($attrNameEntity: $nameEntity): Promise<Read$nameDto> {
+const dtoToString: string = $attrNameEntity.toString();
+return new Read$nameDto($parametrosentityToDto);
+}
+}
+`;
+const mepperRelacion=`import {Injectable} from '@nestjs/common';
 import {$nameEntity} from "../entity";
 import {Create$nameDto, ReadA$nameDto, Update$nameaDto} from "../dto";
 import {$nameRepository,$repositorios} from "../repository";
@@ -30,3 +52,4 @@ return new Read$nameDto($parametrosentityToDto);
 }
 }
 `;
+module.exports={mepperSinRelacion,mepperRelacion}
