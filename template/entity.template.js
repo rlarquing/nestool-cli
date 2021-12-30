@@ -1,4 +1,4 @@
-module.exports=`
+const genericEntity=`
 import {Column, Entity, $typeorm} from "typeorm";
 import {GenericEntity} from "../../shared/entity";
 $import
@@ -18,3 +18,12 @@ export class $nameEntity extends GenericEntity {
     }
 }
 `;
+const genericNomencladorEntity=`
+import {Entity} from "typeorm";
+import {GenericNomencladorEntity} from "./generic-nomencador.entity";
+
+@Entity('$entidad', { schema: '$schema' })
+export class $nameEntity extends GenericNomencladorEntity {
+}
+`;
+module.exports={genericEntity,genericNomencladorEntity}
