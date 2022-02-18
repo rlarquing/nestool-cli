@@ -20,9 +20,9 @@ export class $nameEntity extends GenericEntity {
 `;
 const genericNomencladorEntity=`
 import {Entity} from "typeorm";
-import {GenericNomencladorEntity} from "./generic-nomencador.entity";
+import {GenericNomencladorEntity} from "./generic-nomenclador.entity";
 
-@Entity('$entidad', { schema: '$schema' })
+@Entity('nom_$entidad', { schema: '$schema' })
 export class $nameEntity extends GenericNomencladorEntity {
 }
 `;

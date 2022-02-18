@@ -22,7 +22,12 @@ function procesarLineaDeComandos() {
             }
             if (pendienteAnalisis.includes('constructor')) {
                 let parametros = pendienteAnalisis.substring(pendienteAnalisis.indexOf('(') + 1, pendienteAnalisis.indexOf(') {}'));
-                pendienteAnalisis = pendienteAnalisis.replace(parametros, parametros + ', $parametros');
+                if(parametros.trim()===''){
+                    parametros = pendienteAnalisis.substring(pendienteAnalisis.indexOf('('), pendienteAnalisis.indexOf(') {}')+1);
+                    pendienteAnalisis = pendienteAnalisis.replace(parametros, '($parametros)');
+                }else{
+                    pendienteAnalisis = pendienteAnalisis.replace(parametros, parametros + ', $parametros');
+                }
             }
         }
         restoClase.push(pendienteAnalisis);
