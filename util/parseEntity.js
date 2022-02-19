@@ -78,7 +78,6 @@ function parseEntidad() {
     importaciones=[];
     importNew=[];
     atributos=[];
-    atributosNew=[];
     constructor=[];
     restoClase=[];
     return parse;

@@ -87,12 +87,15 @@ const busquedaInterna = (dir,nombre) => {
 }
 const eliminarDuplicado = (array) => {
     let arreglado = [];
-    array.forEach((element) => {
-        arreglado.push(element.trim());
-    });
-    return arreglado.filter((item, index) => {
-        return arreglado.indexOf(item) === index;
-    });
+    if(array.length!==0){
+        array.forEach((element) => {
+            arreglado.push(element.trim());
+        });
+        return arreglado.filter((item, index) => {
+            return arreglado.indexOf(item) === index;
+        });
+    }
+   return array;
 };
 const thisAtributos = (parametros) => {
     let resultados = [];
@@ -235,7 +238,7 @@ function generarColumna(answer) {
     } else {
         repetido = ", unique: false";
     }
-    let nombre = `, name: ${formatearNombre(answer.nombreAtributo, '_')}`;
+    let nombre = `, name: '${formatearNombre(answer.nombreAtributo, '_')}'`;
 
     var resultado;
     switch (answer.tipoDato) {
@@ -244,26 +247,26 @@ function generarColumna(answer) {
             break;
         case "number":
             if (answer.integer) {
-                resultado = `@Column({ type: 'integer'${repetido}${anulable}${nombre}}})\n${answer.nombreAtributo}: number;`;
+                resultado = `@Column({ type: 'integer'${repetido}${anulable}${nombre}})\n${answer.nombreAtributo}: number;`;
             } else {
-                resultado = `@Column({ type: 'double'${repetido}${anulable}${nombre}}})\n${answer.nombreAtributo}: number;`;
+                resultado = `@Column({ type: 'double'${repetido}${anulable}${nombre}})\n${answer.nombreAtributo}: number;`;
             }
             break;
         case "boolean":
-            resultado = `@Column({type: 'boolean', default: true${nombre}}})\n${answer.nombreAtributo}: boolean;`;
+            resultado = `@Column({type: 'boolean', default: true${nombre}})\n${answer.nombreAtributo}: boolean;`;
             break;
         case "string":
             if (answer.length > 0) {
-                resultado = `@Column({type: 'varchar', length: ${answer.length}${repetido}${anulable}${nombre}}})\n${answer.nombreAtributo}: string;`;
+                resultado = `@Column({type: 'varchar', length: ${answer.length}${repetido}${anulable}${nombre}})\n${answer.nombreAtributo}: string;`;
             } else {
-                resultado = `@Column({ type: 'text'${repetido}${anulable}${nombre}} })\n${answer.nombreAtributo}: string;`;
+                resultado = `@Column({ type: 'text'${repetido}${anulable}${nombre}} )\n${answer.nombreAtributo}: string;`;
             }
             break;
         case "Timestamp":
-            resultado = `@Column({type:'timetz'${repetido}${anulable}${nombre}}})\n${answer.nombreAtributo}:Timestamp;`;
+            resultado = `@Column({type:'timetz'${repetido}${anulable}${nombre}})\n${answer.nombreAtributo}:Timestamp;`;
             break;
         case "Geometry":
-            resultado = `@Column({type:'geometry'${repetido}${anulable}${nombre}}})\n${answer.nombreAtributo}:Geometry;`;
+            resultado = `@Column({type:'geometry'${repetido}${anulable}${nombre}})\n${answer.nombreAtributo}:Geometry;`;
             break;
     }
     return resultado;
