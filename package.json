@@ -21,6 +21,7 @@
     "figlet": "^1.5.2",
     "findit": "^2.0.0",
     "inquirer": "^8.2.0",
+    "inquirer-search-list": "^1.2.6",
     "line-reader-sync": "^0.1.0"
   }
 }

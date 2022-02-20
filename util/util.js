@@ -1,5 +1,6 @@
 const fs = require("fs");
 const inquirer = require("inquirer");
+inquirer.registerPrompt('search-list', require('inquirer-search-list'));
 const chalk = require("chalk");
 const ruta = require("path");
 const util = require("util");
@@ -15,7 +16,46 @@ finder.on("file", function (file) {
 finder.on("directory", function (dir) {
     dirFolders.push(dir);
 });
+const modulos = () => {
+    let listaM = [];
+    dirFolders.forEach((dir) => {
+        listaM.push(dir.substring(dir.indexOf('src')).split(ruta.sep)[1]);
+    });
+    return eliminarDuplicado(listaM).filter((dir) => dir !== '');
+}
+const entidades = () => {
+    let listaE = [];
+    dirFiles.forEach((file) => {
+        let tmp=file.substring(file.indexOf('entity'),file.indexOf('.entity'));
+        if(tmp.includes('entity')){
+            listaE.push(tmp.split(ruta.sep)[1]);
+        }
 
+    });
+    return listaE;
+}
+const entidadesR = () => {
+    let listaE = [];
+    dirFiles.forEach((file) => {
+        let tmp=file.substring(file.indexOf('entity'),file.indexOf('.entity'));
+        if(tmp.includes('entity')){
+            listaE.push(quitarSeparador(tmp.split(ruta.sep)[1],'-')+'Entity');
+        }
+
+    });
+    return listaE;
+}
+const esquemas = () => {
+    let listaE = [];
+   let dirFile=direccionFichero('schema.enum.ts');
+    let fichero = fs.readFileSync(dirFile, 'utf8');
+    let contenido=fichero.substring(fichero.indexOf('{')+1,fichero.indexOf('}')-1).split(',');
+    listaE=contenido.map((esquema)=>{
+        esquema=esquema.trim();
+        return esquema.substring(0,esquema.indexOf(' '));
+    }).filter((esq) => esq !== '');;
+    return listaE;
+}
 const preguntar = async (questions) => {
     let output = [];
     let answers;
@@ -25,7 +65,7 @@ const preguntar = async (questions) => {
             output.push(answers);
         } else {
             console.log(chalk.bold.red("\nEl atributo ya existe."));
-            answers.askAgain=true;
+            answers.askAgain = true;
         }
     } while (answers.askAgain);
     return output;
@@ -33,7 +73,7 @@ const preguntar = async (questions) => {
 const encuentra = (array, elem, field) => {
     return array.some((item) => item[field] === elem[field]);
 };
-const removeFromArr = (arr, item)=> {
+const removeFromArr = (arr, item) => {
     return arr.filter(e => e !== item);
 }
 const find = (lista, elemento) => {
@@ -79,15 +119,15 @@ const direccionClassBusquedaInterna = (nombre) => {
     }
     return -1;
 }
-const busquedaInterna = (dir,nombre) => {
-        let fichero = fs.readFileSync(dir, 'utf8');
-        return fichero.indexOf(nombre) !== -1;
+const busquedaInterna = (dir, nombre) => {
+    let fichero = fs.readFileSync(dir, 'utf8');
+    return fichero.indexOf(nombre) !== -1;
 
 
 }
 const eliminarDuplicado = (array) => {
     let arreglado = [];
-    if(array.length!==0){
+    if (array.length !== 0) {
         array.forEach((element) => {
             arreglado.push(element.trim());
         });
@@ -95,7 +135,7 @@ const eliminarDuplicado = (array) => {
             return arreglado.indexOf(item) === index;
         });
     }
-   return array;
+    return array;
 };
 const thisAtributos = (parametros) => {
     let resultados = [];
@@ -168,8 +208,8 @@ const formatearNombre = (str, separador) => {
     if (str.length === 0) {
         return "";
     }
-    if(str.indexOf('_')!==-1){
-        separador='_';
+    if (str.indexOf('_') !== -1) {
+        separador = '_';
     }
     let resultado = str[0].toLocaleLowerCase();
     for (let i = 1; i < str.length; i++) {
@@ -185,10 +225,10 @@ const quitarSeparador = (str, separador) => {
     if (str.length === 0) {
         return "";
     }
-    if(str.indexOf('_')!==-1){
-        separador='_';
+    if (str.indexOf('_') !== -1) {
+        separador = '_';
     }
-    let resultado = str.split(separador).map(item=>aInicialMayuscula(item));
+    let resultado = str.split(separador).map(item => aInicialMayuscula(item));
     return resultado.join('');
 }
 
@@ -477,5 +517,9 @@ module.exports = {
     quitarSeparador,
     busquedaInterna,
     findElemento,
-    removeFromArr
+    removeFromArr,
+    modulos,
+    entidades,
+    entidadesR,
+    esquemas
 };

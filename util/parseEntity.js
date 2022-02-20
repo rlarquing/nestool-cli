@@ -29,14 +29,14 @@ function procesarLineaDeComandos() {
     }
     if (comienzaCon(pendienteAnalisis, 'constructor')) {
         parametros = pendienteAnalisis.substring(pendienteAnalisis.indexOf('(') + 1, pendienteAnalisis.indexOf(')'));
-        pendienteAnalisis = pendienteAnalisis.replace(parametros, parametros + ', $parametros');
+        pendienteAnalisis = pendienteAnalisis.replace(parametros, parametros + ', $parametros').replace(',,',',');
         constructor.push(pendienteAnalisis);
     }
     if (comienzaCon(pendienteAnalisis, 'this.')) {
         constructor.push(pendienteAnalisis);
     }
     if (comienzaCon(pendienteAnalisis, '}')) {
-        if (restoClase[restoClase.length - 1].includes('this.')) {
+        if (restoClase[restoClase.length - 2].includes('this.')) {
             pendienteAnalisis = pendienteAnalisis.replace('}', '$thisAtributos}');
         }
         constructor.push(pendienteAnalisis);

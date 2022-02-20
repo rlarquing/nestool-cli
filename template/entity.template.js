@@ -1,9 +1,10 @@
 const genericEntity=`
 import {Column, Entity, $typeorm} from "typeorm";
 import {GenericEntity} from "../../shared/entity";
+import { SchemaEnum } from '../../database/schema/schema.enum';
 $import
 
-@Entity('$entidad', { schema: '$schema' })
+@Entity('$entidad', { schema: SchemaEnum.$schema })
 export class $nameEntity extends GenericEntity {
 
     $atributos
@@ -21,8 +22,9 @@ export class $nameEntity extends GenericEntity {
 const genericNomencladorEntity=`
 import {Entity} from "typeorm";
 import {GenericNomencladorEntity} from "./generic-nomenclador.entity";
+import { SchemaEnum } from '../../database/schema/schema.enum';
 
-@Entity('nom_$entidad', { schema: '$schema' })
+@Entity('nom_$entidad', { schema: SchemaEnum.$schema })
 export class $nameEntity extends GenericNomencladorEntity {
 }
 `;
