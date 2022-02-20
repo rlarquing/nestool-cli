@@ -14,7 +14,7 @@ export class $nameEntity extends GenericEntity {
         $thisAtributos
     }
 
-    toString(): string {
+   public toString(): string {
         return '';
     }
 }
