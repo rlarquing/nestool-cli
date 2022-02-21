@@ -36,10 +36,13 @@ function procesarLineaDeComandos() {
         constructor.push(pendienteAnalisis);
     }
     if (comienzaCon(pendienteAnalisis, '}')) {
-        if (restoClase[restoClase.length - 2].includes('this.')) {
-            pendienteAnalisis = pendienteAnalisis.replace('}', '$thisAtributos}');
+        if(restoClase.length>=2){
+            if (restoClase[restoClase.length - 2].includes('this.')) {
+                pendienteAnalisis = pendienteAnalisis.replace('}', '$thisAtributos}');
+            }
+            constructor.push(pendienteAnalisis);
         }
-        constructor.push(pendienteAnalisis);
+
     }
     if (comienzaCon(pendienteAnalisis, '@Entity(')) {
         clase = pendienteAnalisis;

@@ -1,6 +1,6 @@
 const mepperSinRelacion=`import {Injectable} from '@nestjs/common';
 import {$nameEntity} from "../entity";
-import {Create$nameDto, ReadA$nameDto, Update$nameaDto} from "../dto";
+import {Create$nameDto, Read$nameDto, Update$nameDto} from "../dto";
 
 @Injectable()
 export class $nameMapper {
@@ -22,7 +22,7 @@ return new Read$nameDto($parametrosentityToDto);
 `;
 const mepperRelacion=`import {Injectable} from '@nestjs/common';
 import {$nameEntity} from "../entity";
-import {Create$nameDto, ReadA$nameDto, Update$nameaDto} from "../dto";
+import {Create$nameDto, Read$nameDto, Update$nameDto} from "../dto";
 import {$nameRepository,$repositorios} from "../repository";
 $import
 
