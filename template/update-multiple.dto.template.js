@@ -1,6 +1,7 @@
 module.exports=`import {$validadores} from "class-validator";
 import {ApiProperty} from "@nestjs/swagger";
-export class UpdateMultiple$nameDto {
+$import
+export class UpdateMultiple$nameDto $padre {
 
     @IsNotEmpty()
     @ApiProperty({ description: 'id de la $name', example: 1 })

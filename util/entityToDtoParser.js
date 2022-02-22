@@ -199,6 +199,9 @@ function crearReadDto(moduleName) {
             if (direccion.includes('src')) {
                 nombreModulo = direccion.substring(direccion.indexOf('src') + 4, direccion.indexOf('dto') - 1)
             }
+            if(moduleName==='nomenclator'){
+                parametros.push('nombre: string, descripcion: string');
+            }
             if (nombreModulo === moduleName && !esNomenclador) {
                 importaciones.push(`import { Read${quitarSeparador(nombre, '-')}Dto } from './${nombre}.dto';`);
             } else if (esNomenclador) {
