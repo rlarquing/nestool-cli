@@ -289,7 +289,7 @@ function generarColumna(answer) {
             if (answer.integer) {
                 resultado = `@Column({ type: 'integer'${repetido}${anulable}${nombre}})\n${answer.nombreAtributo}: number;`;
             } else {
-                resultado = `@Column({ type: 'double'${repetido}${anulable}${nombre}})\n${answer.nombreAtributo}: number;`;
+                resultado = `@Column({ type: 'double precision'${repetido}${anulable}${nombre}})\n${answer.nombreAtributo}: number;`;
             }
             break;
         case "boolean":

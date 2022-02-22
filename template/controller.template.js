@@ -1,19 +1,20 @@
-module.exports=`import {Body, Controller, Get, Param, ParseIntPipe, Patch, Post, Query, UseGuards} from '@nestjs/common';
+module.exports=`import {Body, Controller, Get, Param, ParseIntPipe, Patch, Post, Query, UseGuards, UsePipes, ValidationPipe} from '@nestjs/common';
 import {Create$nameDto, Read$nameDto, UpdateMultiple$nameDto, Update$nameDto} from '../dto';
 import {$nameService} from '../service';
-import {GetUser, Roles, Servicio} from "../decorator";
-import {RolType} from "../enum/rol-type.enum";
+import {GetUser, Roles, Servicio} from "../../security/decorator";
+import {RolType} from "../../security/enum/rol-type.enum";
 import {AuthGuard} from "@nestjs/passport";
+import {UserEntity} from "../../security/entity";
 import {$nameEntity, UserEntity} from "../entity";
 import {ConfigService} from "@nestjs/config";
 import {ApiBearerAuth, ApiBody, ApiNotFoundResponse, ApiOperation, ApiResponse, ApiTags} from "@nestjs/swagger";
 import {GenericController} from "../../shared/controller";
 import {BadRequestDto, BuscarDto, FiltroGenericoDto, ListadoDto, ResponseDto} from "../../shared/dto";
-import {PermissionGuard} from "../guard";
+import {PermissionGuard} from '../../security/guard';
 $import
 
 @ApiTags('$tag')
-@Controller('$paramCont')
+@Controller('$paraCont')
 @UseGuards(AuthGuard('jwt'), RolGuard, PermissionGuard)
 @ApiBearerAuth()
 @UsePipes(ValidationPipe)
@@ -22,7 +23,7 @@ export class $nameController extends GenericController<$nameEntity> {
         protected $paramService: $nameService,
     protected configService: ConfigService
 ) {
-    super($paramService, configService, '$paramCont');
+    super($paramService, configService, '$paraCont', $nameController);
 }
 
 @Get()
@@ -40,7 +41,7 @@ export class $nameController extends GenericController<$nameEntity> {
 @ApiResponse({status: 401, description: 'Sin autorizacion.'})
 @ApiResponse({status: 403, description: 'Sin autorizacion al recurso.'})
 @ApiResponse({status: 500, description: 'Error interno del servidor.'})
-@Servicio(RolController.name, 'findAll')
+@Servicio($nameController.name, 'findAll')
 async findAll(
     @Query('page') page: number = 1,
 @Query('limit') limit: number = 10): Promise<any> {
@@ -63,7 +64,7 @@ return new ListadoDto(header, data);
 @ApiResponse({status: 401, description: 'Sin autorizacion.'})
 @ApiResponse({status: 403, description: 'Sin autorizacion al recurso.'})
 @ApiResponse({status: 500, description: 'Error interno del servidor.'})
-@Servicio(RolController.name, 'findById')
+@Servicio($nameController.name, 'findById')
 async findById(@Param('id', ParseIntPipe) id: number): Promise<Read$nameDto> {
     return await super.findById(id);
 }
@@ -86,7 +87,7 @@ async findById(@Param('id', ParseIntPipe) id: number): Promise<Read$nameDto> {
 @ApiResponse({status: 401, description: 'Sin autorizacion.'})
 @ApiResponse({status: 403, description: 'Sin autorizacion al recurso.'})
 @ApiResponse({status: 500, description: 'Error interno del servidor.'})
-@Servicio(RolController.name, 'findByIds')
+@Servicio($nameController.name, 'findByIds')
 async findByIds(@Body() ids: number[]): Promise<Read$nameDto[]> {
     return await super.findByIds(ids);
 }
@@ -102,7 +103,7 @@ async findByIds(@Body() ids: number[]): Promise<Read$nameDto[]> {
 @ApiResponse({status: 403, description: 'Sin autorizacion al recurso.'})
 @ApiResponse({status: 500, description: 'Error interno del servidor.'})
 @ApiResponse({status: 400, description: 'Solicitud con errores.',type: BadRequestDto})
-@Servicio(RolController.name, 'create')
+@Servicio($nameController.name, 'create')
 async create(@GetUser() user: UserEntity, @Body() create$nameDto: Create$nameDto): Promise<ResponseDto> {
     return await super.create(user, create$nameDto);
 }
@@ -118,9 +119,25 @@ async create(@GetUser() user: UserEntity, @Body() create$nameDto: Create$nameDto
 @ApiResponse({status: 403, description: 'Sin autorizacion al recurso.'})
 @ApiResponse({status: 500, description: 'Error interno del servidor.'})
 @ApiResponse({status: 400, description: 'Solicitud con errores.',type: BadRequestDto})
-@Servicio(RolController.name, 'createMultiple')
-async createMultiple(@GetUser() user: UserEntity, @Body() create$nameDto: Create$nameDto[]): Promise<ResponseDto> {
+@Servicio($nameController.name, 'createMultiple')
+async createMultiple(@GetUser() user: UserEntity, @Body() create$nameDto: Create$nameDto[]): Promise<ResponseDto[]> {
     return await super.createMultiple(user, create$nameDto);
+}
+
+@Post('/importar/elementos')
+@ApiOperation({summary: 'Importar un grupo de elementos del conjunto.'})
+@ApiBody({
+    description: 'Estructura para crear el grupo de elementos del conjunto.',
+    type: [Create$nameDto],
+})
+@ApiResponse({status: 201, description: 'Crea un grupo de elementos del conjunto.', type: ResponseDto})
+@ApiResponse({status: 401, description: 'Sin autorizacion.'})
+@ApiResponse({status: 403, description: 'Sin autorizacion al recurso.'})
+@ApiResponse({status: 500, description: 'Error interno del servidor.'})
+@ApiResponse({status: 400, description: 'Solicitud con errores.',type: BadRequestDto})
+@Servicio($nameController.name, 'importar')
+async importar(@GetUser() user: UserEntity, @Body() create$nameDto: Create$nameDto[]): Promise<ResponseDto[]> {
+    return await super.importar(user, create$nameDto);
 }
 
 @Patch(':id')
@@ -134,7 +151,7 @@ async createMultiple(@GetUser() user: UserEntity, @Body() create$nameDto: Create
 @ApiResponse({status: 403, description: 'Sin autorizacion al recurso.'})
 @ApiResponse({status: 500, description: 'Error interno del servidor.'})
 @ApiResponse({status: 400, description: 'Solicitud con errores.',type: BadRequestDto})
-@Servicio(RolController.name, 'update')
+@Servicio($nameController.name, 'update')
 async update(@GetUser() user: UserEntity, @Param('id', ParseIntPipe) id: number, @Body() update$nameDto: Update$nameDto): Promise<ResponseDto> {
     return await super.update(user, id, update$nameDto);
 }
@@ -150,7 +167,7 @@ async update(@GetUser() user: UserEntity, @Param('id', ParseIntPipe) id: number,
 @ApiResponse({status: 403, description: 'Sin autorizacion al recurso.'})
 @ApiResponse({status: 500, description: 'Error interno del servidor.'})
 @ApiResponse({status: 400, description: 'Solicitud con errores.',type: BadRequestDto})
-@Servicio(RolController.name, 'updateMultiple')
+@Servicio($nameController.name, 'updateMultiple')
 async updateMultiple(@GetUser() user: UserEntity, @Body() updateMultiple$nameeDto: UpdateMultiple$nameDto[]): Promise<ResponseDto> {
     return await super.updateMultiple(user, updateMultiple$nameeDto);
 }
@@ -169,7 +186,7 @@ async updateMultiple(@GetUser() user: UserEntity, @Body() updateMultiple$nameeDt
 @ApiResponse({status: 401, description: 'Sin autorizacion.'})
 @ApiResponse({status: 403, description: 'Sin autorizacion al recurso.'})
 @ApiResponse({status: 500, description: 'Error interno del servidor.'})
-@Servicio(RolController.name, 'filter')
+@Servicio($nameController.name, 'filter')
 async filter(@Query('page') page: number = 1,
 @Query('limit') limit: number = 10,
 @Body() filtroGenericoDto: FiltroGenericoDto): Promise<any> {
@@ -191,7 +208,7 @@ return new ListadoDto(header, data);
 @ApiResponse({status: 401, description: 'Sin autorizacion.'})
 @ApiResponse({status: 403, description: 'Sin autorizacion al recurso.'})
 @ApiResponse({status: 500, description: 'Error interno del servidor.'})
-@Servicio(RolController.name, 'search')
+@Servicio($nameController.name, 'search')
 async search(@Query('page') page: number = 1,
 @Query('limit') limit: number = 10,
 @Body() buscarDto: BuscarDto): Promise<any> {

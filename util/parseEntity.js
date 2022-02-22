@@ -1,4 +1,4 @@
-const {comienzaCon, right} = require("./util");
+const {comienzaCon, right, aInicialMayuscula} = require("./util");
 const LineReaderSync = require("line-reader-sync");
 let importaciones = [];
 let atributos = [];
@@ -69,6 +69,7 @@ function parseEntidad() {
     importNew.push('$import');
     let atributosNew = atributos.slice();
     atributosNew.push('$atributos');
+    let header=parametros.map((parametro)=>`'${aInicialMayuscula(parametro.split(':')[0])}'`);
     let parse={import: importaciones,
         importNew,
         clase,
@@ -76,7 +77,8 @@ function parseEntidad() {
         atributosNew,
         constructor,
         restoClase,
-        parametros
+        parametros,
+        header
 };
     importaciones=[];
     importNew=[];
