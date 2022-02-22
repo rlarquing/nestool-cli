@@ -126,7 +126,7 @@ let importaciones = [];
 function crearDto() {
     dto = [];
     importaciones = [];
-    let validadores = [];
+    let validadores = ['IsNotEmpty'];
 
     for (let i = 0; i < resultados.length; i++) {
         if (resultados[i].atributo) {
