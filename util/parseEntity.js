@@ -69,7 +69,8 @@ function parseEntidad() {
     importNew.push('$import');
     let atributosNew = atributos.slice();
     atributosNew.push('$atributos');
-    let header=parametros.map((parametro)=>`'${aInicialMayuscula(parametro.split(':')[0])}'`);
+    let arrTmp=parametros.split(',').filter((val)=>val.trim()!=='');
+    let header=arrTmp.map((parametro)=>`'${aInicialMayuscula(parametro.split(':')[0])}'`);
     let parse={import: importaciones,
         importNew,
         clase,
