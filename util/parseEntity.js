@@ -36,6 +36,7 @@ function procesarLineaDeComandos() {
         constructor.push(pendienteAnalisis);
     }
     if (comienzaCon(pendienteAnalisis, '}')) {
+
         if(restoClase.length>=2){
             if (restoClase[restoClase.length - 2].includes('this.')) {
                 pendienteAnalisis = pendienteAnalisis.replace('}', '$thisAtributos}');
@@ -43,6 +44,9 @@ function procesarLineaDeComandos() {
             constructor.push(pendienteAnalisis);
         }
 
+    }
+    if (comienzaCon(pendienteAnalisis, 'public')) {
+        restoClase.push(pendienteAnalisis);
     }
     if (comienzaCon(pendienteAnalisis, '@Entity(')) {
         clase = pendienteAnalisis;
@@ -81,6 +85,7 @@ function parseEntidad() {
         parametros,
         header
 };
+    console.log(parse);
     importaciones=[];
     importNew=[];
     atributos=[];
