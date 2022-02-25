@@ -490,6 +490,68 @@ const formatearArchivos = async () => {
     await exec(`npm run format`);
 };
 
+// Para el parser, ending, donde termina (Sintax validator)
+// Función para que, en una cadena, dada una posición., si esta es un
+// carácter de separador de comillas: ', ` o ", encuentre su par correspondiente., al igual que de abrir un
+// paréntesis (, corchete [ o llave {, me devuelva la posición dónde se cierra. Lleva un tratamiento especial,
+// pues debe desactivarse en cadenas internas y comentarios de bloque, también debe tener presente comentarios de una línea.
+// -1 si no lo encuentra, o hay un error de formación.
+const ending = (cadena, posicion) =>  {
+    // Si es una línea de comentarios debe devolver la posición de la siguiente línea.
+    if (posicion >= cadena.length) {
+        return -1;
+    }
+    // pares
+    var pares = [{start: "(", end: ")"},
+        {start: "{", end: "}"},
+        {start: "/*", end: "*/"}];
+    if (cadena.substr(posicion, 2) === "//") { // Line comment, until CR or EOF
+        var endComment = cadena.indexOf("\n", posicion + 2);
+        if (endComment === -1) {
+            return cadena.length - 1; // y se devuelve hasta el retorno del carro.
+        }
+        return endComment;
+    } else if (cadena.substr(posicion, 2) === "/*") { // Block comment, always until */, or error
+        var endComment = cadena.indexOf("*/", posicion + 2);
+        return endComment; // sino, completo.
+    }
+    // De otro modo
+    switch (cadena[posicion]) {
+        case "'": { // simples
+            posicion = cadena.indexOf("'", posicion + 1);
+            break;
+        }
+        case "`": { // francesas
+            posicion = cadena.indexOf("`", posicion + 1);
+            break;
+        }
+        case '"': { // dobles
+            posicion = cadena.indexOf('"', posicion + 1);
+            break;
+        }
+        default: {
+            for (var i = 0; i < pares.length; i++) {
+                if (cadena.substr(posicion, pares[i].start.length) === pares[i].start) {
+                    posicion = posicion + pares[i].start.length; // reubica el puntero
+                    while ((posicion !== -1) && (posicion < cadena.length)) {
+                        if (cadena.substr(posicion, pares[i].end.length) === pares[i].end) {
+                            return posicion + pares[i].end.length - 1;
+                        }
+                        posicion = ending(cadena, posicion);
+                        if (posicion >= cadena.length) {
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+    }
+    if (posicion === -1 || posicion >= cadena.length) {
+        return -1;
+    }
+    return posicion + 1;
+}
+
 module.exports = {
     preguntar,
     buscarFichero,
@@ -521,5 +583,6 @@ module.exports = {
     modulos,
     entidades,
     entidadesR,
-    esquemas
+    esquemas,
+    ending
 };
