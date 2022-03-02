@@ -39,8 +39,13 @@ function procesarLineaDeComandos() {
        if(restoClase.length>=2){
            if(restoClase[restoClase.length-2].includes(';')){
                if (comienzaCon(restoClase[restoClase.length - 2], 'this.')) {
-                   pendienteAnalisis = pendienteAnalisis.replace('}', '$thisAtributos}');
-                   constructor.push(pendienteAnalisis);
+                   constructor.push('$thisAtributos}');
+                   restoClase=[];
+                   if(pendienteAnalisis==='}}'){
+                       restoClase.push('}');
+                   }else{
+                       restoClase.push(pendienteAnalisis.substring(1));
+                   }
                }
            }
        }
