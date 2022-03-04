@@ -36,14 +36,19 @@ function procesarLineaDeComandos() {
         constructor.push(pendienteAnalisis);
     }
     if (comienzaCon(pendienteAnalisis, '}')) {
-
-        if(restoClase.length>=2){
-            if (restoClase[restoClase.length - 2].includes('this.')) {
-                pendienteAnalisis = pendienteAnalisis.replace('}', '$thisAtributos}');
-            }
-            constructor.push(pendienteAnalisis);
-        }
-
+       if(restoClase.length>=2){
+           if(restoClase[restoClase.length-2].includes(';')){
+               if (comienzaCon(restoClase[restoClase.length - 2], 'this.')) {
+                   constructor.push('$thisAtributos}');
+                   restoClase=[];
+                   if(pendienteAnalisis==='}}'){
+                       restoClase.push('}');
+                   }else{
+                       restoClase.push(pendienteAnalisis.substring(1));
+                   }
+               }
+           }
+       }
     }
     if (comienzaCon(pendienteAnalisis, 'public')) {
         restoClase.push(pendienteAnalisis);
@@ -85,7 +90,6 @@ function parseEntidad() {
         parametros,
         header
 };
-    console.log(parse);
     importaciones=[];
     importNew=[];
     atributos=[];
