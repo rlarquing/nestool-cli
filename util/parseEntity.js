@@ -40,13 +40,11 @@ function procesarLineaDeComandos() {
            if(restoClase[restoClase.length-2].includes(';')){
                if (comienzaCon(restoClase[restoClase.length - 2], 'this.')) {
                    constructor.push('$thisAtributos}');
-                   console.log('esto es resto de la clase',restoClase);
                    restoClase=[];
                    if(pendienteAnalisis==='}}'){
                        restoClase.push('}');
                    }else{
                        restoClase.push(pendienteAnalisis.substring(1));
-                       console.log('esto es si no termina con dos llaves',restoClase);
                    }
                }
            }

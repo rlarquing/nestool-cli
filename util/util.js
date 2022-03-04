@@ -504,7 +504,7 @@ const ending = (cadena, posicion) =>  {
     // pares
     var pares = [{start: "(", end: ")"},
         {start: "{", end: "}"},
-        {start: "/*", end: "*/"}];
+        {start: "[", end: "]"}];
     if (cadena.substr(posicion, 2) === "//") { // Line comment, until CR or EOF
         var endComment = cadena.indexOf("\n", posicion + 2);
         if (endComment === -1) {
