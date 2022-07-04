@@ -4,11 +4,12 @@ const {
     right,
     eliminarDuplicado,
     buscarFichero,
-    thisAtributos, formatearNombre, direccionFichero, quitarSeparador
+    thisAtributos, formatearNombre, direccionFichero, quitarSeparador, parseString, tigerScript
 } = require("./util");
 const ruta = require("path");
 const {busquedaInterna, aInicialMinuscula} = require("../util/util");
 const LineReaderSync = require("line-reader-sync");
+const fs = require("fs");
 let resultados = [];
 
 // analizar la próxima línea
@@ -268,19 +269,9 @@ function crearReadDto(moduleName) {
 
 // y este último ya te construye el a partir de un arreglo original
 const generarDto = (dir) => {
-    const lrs = new LineReaderSync(dir);
-    let lineas = lrs.toLines();
-    // ejemplo, primero comienzas un nuevo parseo, despues linea a linea hasta que llegues a la última
-    //nuevoParseo();
-    // Leer las lineas una a una
-    for (let index = 0; index < lineas.length; index++) {
-        const element = lineas[index];
-        leerProximaLinea(element);
-    }
-    procesarLineaDeComandos(); // procesar aunque no terminea en ;
+    let fichero = fs.readFileSync(dir, 'utf8');
 
-    // te crea algo parecido a una precompilación en resultados con todos los elementos para armar el dto
-    return crearDto();
+    return tigerScript(fichero);
 }
 
 const generarReadDto = (dir, moduleName) => {
