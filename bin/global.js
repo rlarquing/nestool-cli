@@ -23,10 +23,6 @@ const {crud} = require("../lib/crud");
 
     let opt = await menu();
     switch (opt.opcion) {
-        case "modulo":
-            await estructura(await queryParams());
-            break;
-
         case "controlador":
             await controller();
             break;
@@ -49,6 +45,9 @@ const {crud} = require("../lib/crud");
             break;
         case "crud":
             await crud();
+            break;
+        case "exit":
+            process.exit(1);
             break;
     }
     await formatearArchivos();

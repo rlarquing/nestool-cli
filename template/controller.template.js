@@ -1,16 +1,21 @@
 module.exports=`import {Body, Controller, Get, Param, ParseIntPipe, Patch, Post, Query, UseGuards, UsePipes, ValidationPipe} from '@nestjs/common';
-import {Create$nameDto, Read$nameDto, UpdateMultiple$nameDto, Update$nameDto} from '../dto';
-import {$nameService} from '../service';
-import {GetUser, Roles, Servicio} from "../../security/decorator";
-import {RolType} from "../../security/enum/rol-type.enum";
+import {$nameService} from '../../core/service';
+import {GetUser, Servicio} from "../decorator";
+import {RolType} from "../../shared/enum";
 import {AuthGuard} from "@nestjs/passport";
-import {UserEntity} from "../../security/entity";
-import {$nameEntity, UserEntity} from "../entity";
+import { RolGuard } from '../guard';
+import {$nameEntity, UserEntity} from "../../persistence/entity";
 import {ConfigService} from "@nestjs/config";
-import {ApiBearerAuth, ApiBody, ApiNotFoundResponse, ApiOperation, ApiResponse, ApiTags} from "@nestjs/swagger";
-import {GenericController} from "../../shared/controller";
-import {BadRequestDto, BuscarDto, FiltroGenericoDto, ListadoDto, ResponseDto} from "../../shared/dto";
-import {PermissionGuard} from '../../security/guard';
+import { ApiBearerAuth,
+  ApiBody,
+  ApiNotFoundResponse,
+  ApiOperation,
+  ApiParam, ApiQuery,
+  ApiResponse,
+  ApiTags,} from "@nestjs/swagger";
+import {GenericController} from "./generic.controller";
+import {BadRequestDto, BuscarDto, FiltroGenericoDto, ListadoDto, ResponseDto, Create$nameDto, Read$nameDto, UpdateMultiple$nameDto, Update$nameDto} from "../../shared/dto";
+import {PermissionGuard} from '../guard';
 $import
 
 @ApiTags('$tag')
@@ -23,11 +28,10 @@ export class $nameController extends GenericController<$nameEntity> {
         protected $paramService: $nameService,
     protected configService: ConfigService
 ) {
-    super($paramService, configService, '$paraCont', $nameController);
+    super($paramService, configService, '$paraCont');
 }
 
-@Get()
-@Roles(RolType.ADMINISTRADOR)//El decorador roles no trabaja arriba en la cabeza del controlador.
+@Get('/')
 @ApiOperation({summary: 'Obtener el listado de elementos del conjunto'})
 @ApiResponse({
     status: 200,
@@ -41,16 +45,19 @@ export class $nameController extends GenericController<$nameEntity> {
 @ApiResponse({status: 401, description: 'Sin autorizacion.'})
 @ApiResponse({status: 403, description: 'Sin autorizacion al recurso.'})
 @ApiResponse({status: 500, description: 'Error interno del servidor.'})
-@Servicio($nameController.name, 'findAll')
+@ApiParam({ required: false, name: 'page', example: '1' })
+@ApiParam({ required: false, name: 'limit', example: '10' })
+@Servicio($name, 'findAll')
 async findAll(
     @Query('page') page: number = 1,
 @Query('limit') limit: number = 10): Promise<any> {
     const data = await super.findAll(page, limit);
     const header: string[] = ['id', $header];
-return new ListadoDto(header, data);
+    const key: string[] = ['id', $header];
+return new ListadoDto(header, key, data);
 }
 
-@Get(':id')
+@Get('/:id')
 @ApiOperation({summary: 'Obtener un elemento del conjunto'})
 @ApiResponse({
     status: 200,
@@ -64,7 +71,7 @@ return new ListadoDto(header, data);
 @ApiResponse({status: 401, description: 'Sin autorizacion.'})
 @ApiResponse({status: 403, description: 'Sin autorizacion al recurso.'})
 @ApiResponse({status: 500, description: 'Error interno del servidor.'})
-@Servicio($nameController.name, 'findById')
+@Servicio($name, 'findById')
 async findById(@Param('id', ParseIntPipe) id: number): Promise<Read$nameDto> {
     return await super.findById(id);
 }
@@ -87,12 +94,12 @@ async findById(@Param('id', ParseIntPipe) id: number): Promise<Read$nameDto> {
 @ApiResponse({status: 401, description: 'Sin autorizacion.'})
 @ApiResponse({status: 403, description: 'Sin autorizacion al recurso.'})
 @ApiResponse({status: 500, description: 'Error interno del servidor.'})
-@Servicio($nameController.name, 'findByIds')
+@Servicio($name, 'findByIds')
 async findByIds(@Body() ids: number[]): Promise<Read$nameDto[]> {
     return await super.findByIds(ids);
 }
 
-@Post()
+@Post('/')
 @ApiOperation({summary: 'Crear un elemento del conjunto.'})
 @ApiBody({
     description: 'Estructura para crear el elemento del conjunto.',
@@ -103,7 +110,7 @@ async findByIds(@Body() ids: number[]): Promise<Read$nameDto[]> {
 @ApiResponse({status: 403, description: 'Sin autorizacion al recurso.'})
 @ApiResponse({status: 500, description: 'Error interno del servidor.'})
 @ApiResponse({status: 400, description: 'Solicitud con errores.',type: BadRequestDto})
-@Servicio($nameController.name, 'create')
+@Servicio($name, 'create')
 async create(@GetUser() user: UserEntity, @Body() create$nameDto: Create$nameDto): Promise<ResponseDto> {
     return await super.create(user, create$nameDto);
 }
@@ -119,7 +126,7 @@ async create(@GetUser() user: UserEntity, @Body() create$nameDto: Create$nameDto
 @ApiResponse({status: 403, description: 'Sin autorizacion al recurso.'})
 @ApiResponse({status: 500, description: 'Error interno del servidor.'})
 @ApiResponse({status: 400, description: 'Solicitud con errores.',type: BadRequestDto})
-@Servicio($nameController.name, 'createMultiple')
+@Servicio($name, 'createMultiple')
 async createMultiple(@GetUser() user: UserEntity, @Body() create$nameDto: Create$nameDto[]): Promise<ResponseDto[]> {
     return await super.createMultiple(user, create$nameDto);
 }
@@ -135,12 +142,12 @@ async createMultiple(@GetUser() user: UserEntity, @Body() create$nameDto: Create
 @ApiResponse({status: 403, description: 'Sin autorizacion al recurso.'})
 @ApiResponse({status: 500, description: 'Error interno del servidor.'})
 @ApiResponse({status: 400, description: 'Solicitud con errores.',type: BadRequestDto})
-@Servicio($nameController.name, 'importar')
+@Servicio($name, 'importar')
 async importar(@GetUser() user: UserEntity, @Body() create$nameDto: Create$nameDto[]): Promise<ResponseDto[]> {
     return await super.importar(user, create$nameDto);
 }
 
-@Patch(':id')
+@Patch('/:id')
 @ApiOperation({summary: 'Actualizar un elemento del conjunto.'})
 @ApiBody({
     description: 'Estructura para modificar el elemento del conjunto.',
@@ -151,7 +158,7 @@ async importar(@GetUser() user: UserEntity, @Body() create$nameDto: Create$nameD
 @ApiResponse({status: 403, description: 'Sin autorizacion al recurso.'})
 @ApiResponse({status: 500, description: 'Error interno del servidor.'})
 @ApiResponse({status: 400, description: 'Solicitud con errores.',type: BadRequestDto})
-@Servicio($nameController.name, 'update')
+@Servicio($name, 'update')
 async update(@GetUser() user: UserEntity, @Param('id', ParseIntPipe) id: number, @Body() update$nameDto: Update$nameDto): Promise<ResponseDto> {
     return await super.update(user, id, update$nameDto);
 }
@@ -167,7 +174,7 @@ async update(@GetUser() user: UserEntity, @Param('id', ParseIntPipe) id: number,
 @ApiResponse({status: 403, description: 'Sin autorizacion al recurso.'})
 @ApiResponse({status: 500, description: 'Error interno del servidor.'})
 @ApiResponse({status: 400, description: 'Solicitud con errores.',type: BadRequestDto})
-@Servicio($nameController.name, 'updateMultiple')
+@Servicio($name, 'updateMultiple')
 async updateMultiple(@GetUser() user: UserEntity, @Body() updateMultiple$nameeDto: UpdateMultiple$nameDto[]): Promise<ResponseDto> {
     return await super.updateMultiple(user, updateMultiple$nameeDto);
 }
@@ -186,13 +193,16 @@ async updateMultiple(@GetUser() user: UserEntity, @Body() updateMultiple$nameeDt
 @ApiResponse({status: 401, description: 'Sin autorizacion.'})
 @ApiResponse({status: 403, description: 'Sin autorizacion al recurso.'})
 @ApiResponse({status: 500, description: 'Error interno del servidor.'})
-@Servicio($nameController.name, 'filter')
+@ApiQuery({ required: false, name: 'page', example: '1' })
+@ApiQuery({ required: false, name: 'limit', example: '10' })
+@Servicio($name, 'filter')
 async filter(@Query('page') page: number = 1,
 @Query('limit') limit: number = 10,
 @Body() filtroGenericoDto: FiltroGenericoDto): Promise<any> {
     const data = await super.filter(page, limit, filtroGenericoDto);
     const header: string[] = ['id', $header];
-return new ListadoDto(header, data);
+    const key: string[] = ['id', $header];
+return new ListadoDto(header, key, data);
 }
 @Post('buscar')
 @ApiOperation({summary: 'Buscar en el conjunto por el parametro establecido'})
@@ -208,13 +218,16 @@ return new ListadoDto(header, data);
 @ApiResponse({status: 401, description: 'Sin autorizacion.'})
 @ApiResponse({status: 403, description: 'Sin autorizacion al recurso.'})
 @ApiResponse({status: 500, description: 'Error interno del servidor.'})
-@Servicio($nameController.name, 'search')
+@ApiQuery({ required: false, name: 'page', example: '1' })
+@ApiQuery({ required: false, name: 'limit', example: '10' })
+@Servicio($name, 'search')
 async search(@Query('page') page: number = 1,
 @Query('limit') limit: number = 10,
 @Body() buscarDto: BuscarDto): Promise<any> {
     const data = await super.search(page, limit, buscarDto);
     const header: string[] = ['id', $header];
-return new ListadoDto(header, data);
+    const key: string[] = ['id', $header];
+return new ListadoDto(header, key, data);
 }
 }
 `;

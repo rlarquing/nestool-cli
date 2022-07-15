@@ -1,15 +1,5 @@
 const chalk = require("chalk");
-const {modulos, entidades} = require("../util/util");
-const ruta = require("path");
-const pathBase = process.cwd();
-let pathTmp = '';
-const preg={
-    name: "moduleName",
-    type: "search-list",
-    choices: modulos,
-    pageSize: modulos.length,
-    message: "Escribe el nombre del módulo:",
-};
+const {entidades} = require("../util/util");
 const preguntaBase = async (...pregunta) => {
     let preguntas = [
         {

@@ -16,13 +16,6 @@ finder.on("file", function (file) {
 finder.on("directory", function (dir) {
     dirFolders.push(dir);
 });
-const modulos = () => {
-    let listaM = [];
-    dirFolders.forEach((dir) => {
-        listaM.push(dir.substring(dir.indexOf('src')).split(ruta.sep)[1]);
-    });
-    return eliminarDuplicado(listaM).filter((dir) => dir !== '');
-}
 const entidades = () => {
     let listaE = [];
     dirFiles.forEach((file) => {
@@ -1083,7 +1076,6 @@ module.exports = {
     busquedaInterna,
     findElemento,
     removeFromArr,
-    modulos,
     entidades,
     entidadesR,
     esquemas,
