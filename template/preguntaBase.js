@@ -1,4 +1,3 @@
-const chalk = require("chalk");
 const {entidades} = require("../util/util");
 const preguntaBase = async (...pregunta) => {
     let preguntas = [
