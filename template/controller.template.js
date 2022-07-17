@@ -15,7 +15,7 @@ import { ApiBearerAuth,
   ApiTags,} from "@nestjs/swagger";
 import {GenericController} from "./generic.controller";
 import {BadRequestDto, BuscarDto, FiltroGenericoDto, ListadoDto, ResponseDto, Create$nameDto, Read$nameDto, UpdateMultiple$nameDto, Update$nameDto} from "../../shared/dto";
-import {PermissionGuard} from '../guard';
+import {RolGuard, PermissionGuard} from '../guard';
 $import
 
 @ApiTags('$tag')
@@ -47,7 +47,7 @@ export class $nameController extends GenericController<$nameEntity> {
 @ApiResponse({status: 500, description: 'Error interno del servidor.'})
 @ApiParam({ required: false, name: 'page', example: '1' })
 @ApiParam({ required: false, name: 'limit', example: '10' })
-@Servicio($name, 'findAll')
+@Servicio($nServicio, 'findAll')
 async findAll(
     @Query('page') page: number = 1,
 @Query('limit') limit: number = 10): Promise<any> {
@@ -71,7 +71,7 @@ return new ListadoDto(header, key, data);
 @ApiResponse({status: 401, description: 'Sin autorizacion.'})
 @ApiResponse({status: 403, description: 'Sin autorizacion al recurso.'})
 @ApiResponse({status: 500, description: 'Error interno del servidor.'})
-@Servicio($name, 'findById')
+@Servicio($nServicio, 'findById')
 async findById(@Param('id', ParseIntPipe) id: number): Promise<Read$nameDto> {
     return await super.findById(id);
 }
@@ -94,7 +94,7 @@ async findById(@Param('id', ParseIntPipe) id: number): Promise<Read$nameDto> {
 @ApiResponse({status: 401, description: 'Sin autorizacion.'})
 @ApiResponse({status: 403, description: 'Sin autorizacion al recurso.'})
 @ApiResponse({status: 500, description: 'Error interno del servidor.'})
-@Servicio($name, 'findByIds')
+@Servicio($nServicio, 'findByIds')
 async findByIds(@Body() ids: number[]): Promise<Read$nameDto[]> {
     return await super.findByIds(ids);
 }
@@ -110,7 +110,7 @@ async findByIds(@Body() ids: number[]): Promise<Read$nameDto[]> {
 @ApiResponse({status: 403, description: 'Sin autorizacion al recurso.'})
 @ApiResponse({status: 500, description: 'Error interno del servidor.'})
 @ApiResponse({status: 400, description: 'Solicitud con errores.',type: BadRequestDto})
-@Servicio($name, 'create')
+@Servicio($nServicio, 'create')
 async create(@GetUser() user: UserEntity, @Body() create$nameDto: Create$nameDto): Promise<ResponseDto> {
     return await super.create(user, create$nameDto);
 }
@@ -126,7 +126,7 @@ async create(@GetUser() user: UserEntity, @Body() create$nameDto: Create$nameDto
 @ApiResponse({status: 403, description: 'Sin autorizacion al recurso.'})
 @ApiResponse({status: 500, description: 'Error interno del servidor.'})
 @ApiResponse({status: 400, description: 'Solicitud con errores.',type: BadRequestDto})
-@Servicio($name, 'createMultiple')
+@Servicio($nServicio, 'createMultiple')
 async createMultiple(@GetUser() user: UserEntity, @Body() create$nameDto: Create$nameDto[]): Promise<ResponseDto[]> {
     return await super.createMultiple(user, create$nameDto);
 }
@@ -142,7 +142,7 @@ async createMultiple(@GetUser() user: UserEntity, @Body() create$nameDto: Create
 @ApiResponse({status: 403, description: 'Sin autorizacion al recurso.'})
 @ApiResponse({status: 500, description: 'Error interno del servidor.'})
 @ApiResponse({status: 400, description: 'Solicitud con errores.',type: BadRequestDto})
-@Servicio($name, 'importar')
+@Servicio($nServicio, 'importar')
 async importar(@GetUser() user: UserEntity, @Body() create$nameDto: Create$nameDto[]): Promise<ResponseDto[]> {
     return await super.importar(user, create$nameDto);
 }
@@ -158,7 +158,7 @@ async importar(@GetUser() user: UserEntity, @Body() create$nameDto: Create$nameD
 @ApiResponse({status: 403, description: 'Sin autorizacion al recurso.'})
 @ApiResponse({status: 500, description: 'Error interno del servidor.'})
 @ApiResponse({status: 400, description: 'Solicitud con errores.',type: BadRequestDto})
-@Servicio($name, 'update')
+@Servicio($nServicio, 'update')
 async update(@GetUser() user: UserEntity, @Param('id', ParseIntPipe) id: number, @Body() update$nameDto: Update$nameDto): Promise<ResponseDto> {
     return await super.update(user, id, update$nameDto);
 }
@@ -174,7 +174,7 @@ async update(@GetUser() user: UserEntity, @Param('id', ParseIntPipe) id: number,
 @ApiResponse({status: 403, description: 'Sin autorizacion al recurso.'})
 @ApiResponse({status: 500, description: 'Error interno del servidor.'})
 @ApiResponse({status: 400, description: 'Solicitud con errores.',type: BadRequestDto})
-@Servicio($name, 'updateMultiple')
+@Servicio($nServicio, 'updateMultiple')
 async updateMultiple(@GetUser() user: UserEntity, @Body() updateMultiple$nameeDto: UpdateMultiple$nameDto[]): Promise<ResponseDto> {
     return await super.updateMultiple(user, updateMultiple$nameeDto);
 }
@@ -195,7 +195,7 @@ async updateMultiple(@GetUser() user: UserEntity, @Body() updateMultiple$nameeDt
 @ApiResponse({status: 500, description: 'Error interno del servidor.'})
 @ApiQuery({ required: false, name: 'page', example: '1' })
 @ApiQuery({ required: false, name: 'limit', example: '10' })
-@Servicio($name, 'filter')
+@Servicio($nServicio, 'filter')
 async filter(@Query('page') page: number = 1,
 @Query('limit') limit: number = 10,
 @Body() filtroGenericoDto: FiltroGenericoDto): Promise<any> {
@@ -220,7 +220,7 @@ return new ListadoDto(header, key, data);
 @ApiResponse({status: 500, description: 'Error interno del servidor.'})
 @ApiQuery({ required: false, name: 'page', example: '1' })
 @ApiQuery({ required: false, name: 'limit', example: '10' })
-@Servicio($name, 'search')
+@Servicio($nServicio, 'search')
 async search(@Query('page') page: number = 1,
 @Query('limit') limit: number = 10,
 @Body() buscarDto: BuscarDto): Promise<any> {

@@ -307,8 +307,198 @@ function generarColumna(answer) {
 const formatearArchivos = async () => {
     await exec(`npm run format`);
 };
+function transformar(objetivo, patronAReconocer, patronAAplicar) {
+    // Es ua variable si comienza con % y no tiene espacios.
+    function esUnaVariable(expr) {
+        if (!expr) {
+            return false;
+        }
 
-const tigerScript = (str) => {
+        let apa = String(expr);
+        if ((apa.length < 2)) {
+            return false;
+        }
+        if (apa.charAt(0) !== '%') {
+            return false;
+        }
+        return apa.charAt(1) !== ' ';
+
+    }
+
+    // verdadero si el cáracter es un número.
+    function esNumerico(expr) {
+        return !isNaN(parseInt(expr, 10));
+    }
+
+    // verdadero si el cáracter es una de esas letras.
+    function esAlfabetico(expr) {
+        let alphaCheck = /^[a-zA-Z_áéíóúüÁÉÍÓÚÜñÑ]+$/g;
+        return alphaCheck.test(expr);
+    }
+
+    // verdadero si el cáracter es una letra o un número.
+    function esAlfanumerico(expr) {
+        return esNumerico(expr) || esAlfabetico(expr);
+    }
+
+    // Descompone la expresión expr en un arreglo con las partes variables y literales por separado.
+    function parsearEnPartes(expr) { // fixed
+        expr = String(expr);
+
+        var resultado = [];
+        var tmp = "";
+        var itIsVariable = false;
+        expr = String(expr);
+        for (i = 0; i < expr.length; i++) {
+            if (expr.charAt(i) === '%') {
+                if (tmp !== '') {
+                    resultado.push(String(tmp));
+                    tmp = ''
+                }
+                if (!itIsVariable) { // no lo era?
+                    itIsVariable = true;
+                }
+            } else if (!esAlfanumerico(expr.charAt(i))) {
+                if (itIsVariable) {
+                    resultado.push(String(tmp));
+                    tmp = '';
+                    itIsVariable = false;
+                }
+            }
+            tmp = tmp + expr.charAt(i);
+        }
+        resultado.push(String(tmp));
+        return resultado;
+    }
+
+    function getVar(cadenaPrincipal, nombreDeVariable, arregloDelAPtronAReconocer) {
+        for (i = 0; i < arregloDelAPtronAReconocer.length; i++) {
+            if (nombreDeVariable === arregloDelAPtronAReconocer[i].cadena) {
+                return String(cadenaPrincipal).substring(arregloDelAPtronAReconocer[i].inicio, arregloDelAPtronAReconocer[i].fin + 1);
+            }
+        }
+        return "";
+    }
+
+    // Se necesita como un objeto, no como una cadena.
+    obj = String(objetivo);
+
+    // Se inicializa el arreglo (listado) de los resultados.
+    let resultado = objetivo;
+
+    if (obj === "" || patronAReconocer === "") {
+        // El objetivo está vacío.
+        return resultados;
+    }
+
+    let par = parsearEnPartes(patronAReconocer);
+    let paa = parsearEnPartes(patronAAplicar);
+
+    // Si hay algín literal de patrón a reconocer que no esté el objetivo, te vas clarito
+    let baseBusqueda = 0;
+    for (j = 0; j < par.length; j++) {
+        baseBusqueda = obj.indexOf(par[j], baseBusqueda);
+        if (baseBusqueda === -1 && !esUnaVariable(par[j])) {
+            return objetivo;
+        }
+    }
+
+    // Solamente para fines de validación, si el primer elemento del paa es un literal
+    // y no está en la posición 0 del objetivo, se va igual...
+    if (!esUnaVariable(par[0]) && obj.indexOf(par[0], 0) !== 0) {
+        return objetivo;
+    }
+
+    // De igual forma, si el último...
+    if (!esUnaVariable(par[par.length - 1]) && obj.indexOf(par[par.length - 1], obj.length - par[par.length - 1].length) !== obj.length - par[par.length - 1].length) {
+        return objetivo;
+    }
+
+    if (par.length === 0 || par.length === 0) {
+        return resultado;
+    } else if (par.length === 1 && esUnaVariable(patronAReconocer)) {
+        let resultado = reemplazarCadena(patronAAplicar, patronAReconocer, obj);
+        return resultado;
+    } else if (paa.length === 1 && !esUnaVariable(patronAAplicar)) {
+        let resultado = patronAAplicar;
+        return resultado;
+    }
+
+    let toTheLeft = 0;
+    let toTheRight = par.length - 1;
+    let llastPost = 0;
+    let parL = new Array(par.length); // Guarda las posiciones de los literales dentro del objetivo...
+    for (j = 0; j < par.length; j++) {
+        if (!esUnaVariable(par[j])) {
+            a = obj.indexOf(par[j], obj, llastPost);
+            llastPost = a;
+            parL[j] = { cadena: par[j], inicio: a, fin: a + par[j].length - 1 };
+        } else {
+            parL[j] = { cadena: par[j], inicio: -1, fin: -1 };
+        }
+    }
+
+    // encadenar los principios
+    for (i = 1; i < parL.length; i++) {
+        if (parL[i].inicio <= 0) {
+            parL[i].inicio = parL[i - 1].fin + 1;
+        }
+    }
+
+    // encadenar los finales
+    for (i = 0; i < parL.length - 1; i++) {
+        if (parL[i].fin <= 0) {
+            parL[i].fin = parL[i + 1].inicio - 1;
+        }
+    }
+
+    // no se te debe olvidar que el primer elemento comienza en cero y el último en la longitud
+    parL[0].inicio = 0;
+    parL[parL.length - 1].fin = obj.length - 1;
+
+    // armar el resultado, a partir de nada.
+    resultado = "";
+    for (j = 0; j < paa.length; j++) {
+        if (esUnaVariable(paa[j])) {
+            // console.log("getvar me da " + getVar(obj, paa[i], parL));
+            resultado += getVar(obj, paa[j], parL);
+        } else {
+            resultado += paa[j];
+        }
+    }
+
+    return resultado;
+}
+
+// verdadero si el cáracter es en un dígito.
+const isNumericAt = (str, position) =>{
+    if (str.length < position + 1) return false;
+    return String("0123456789").indexOf(str.substr(position, 1)) !== -1;
+}
+
+// verdadero si el cáracter es una de esas letras.
+const isAlphabeticAt=(str, position) => {
+    if (str.length < position + 1) return false;
+    return String("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZA@_áéíóúüÁÉÍÓÚÜñÑ").indexOf(str.substr(position, 1)) !== -1;
+}
+
+// verdadero si el cáracter es una letra o un número.
+const isAlphanumericAt = (str, position) => {
+    return isNumericAt(str, position) || isAlphabeticAt(str, position);
+}
+
+// verdadero si el cáracter es igual al argumento...
+const isEqualAt = (str, chr, position) => {
+    if (str.length < position + 1) return false;
+    return (str.substring(position, 1) === chr);
+}
+
+// verdadero si el cáracter es un underscore...
+function isUnderscore(str, position) {
+    return isEqualAt(str, "_", position);
+}
+
+const descompilarScript = (str) => {
 
     // Sintactical analizer (nexto to where the operator in position ends).
     function sintaxCheck(cadena, posicion) {
@@ -363,7 +553,7 @@ const tigerScript = (str) => {
             }
         }
         if (posicion === -1 || posicion >= cadena.length) {
-            // here just try to find where begin some of them...
+            // here just try to find where comienzaCon some of them...
             return -1;
         }
         return posicion + 1;
@@ -425,7 +615,7 @@ const tigerScript = (str) => {
         line = String(line);
         var abreEn = line.indexOf("(");
         var cierraEn = sintaxCheck(line, abreEn);
-        var cont = tigerScript(line.substring(abreEn + 1, cierraEn - 1));
+        var cont = descompilarScript(line.substring(abreEn + 1, cierraEn - 1));
         var resto = line.substring(cierraEn);
         return { type: "parenthesis", content: cont, remainder: resto };
     }
@@ -483,7 +673,7 @@ const tigerScript = (str) => {
     function esFuncion(line) {
         // Determinar si es una función
         line = line.trim();
-        if (begin(line, "function")) {
+        if (comienzaCon(line, "function")) {
             var firstParBeg = line.indexOf("(");
             if (firstParBeg === -1) return false;
             var firstParEnd = sintaxCheck(line, line.indexOf("("));
@@ -613,7 +803,7 @@ const tigerScript = (str) => {
                 }
             }
         }
-        result.content = tigerScript(tmp);
+        result.content = descompilarScript(tmp);
         if (result.content.length > 0 && result.content[0].type === "block") {
             result.body = result.content[0].body;
             delete result.content;
@@ -648,7 +838,7 @@ const tigerScript = (str) => {
     function esConstructorDeClase(line) {
         // Determinar si es una función
         line = line.trim();
-        if (begin(line, "constructor")) {
+        if (comienzaCon(line, "constructor")) {
             var firstParBeg = line.indexOf("(");
             if (firstParBeg === false) return false;
             var firstParEnd = sintaxCheck(line, line.indexOf("("));
@@ -674,7 +864,7 @@ const tigerScript = (str) => {
         resultado.type = "constructor";
         // pueden aparecer parámetros en blanco...
         resultado.parameters = line.substring(firstParBeg + 1, firstParEnd - 1).split(",").filter((x) => x.trim() !== "");
-        resultado.content = tigerScript(line.substring(corpusBeg + 1, corpusEnd - 1));
+        resultado.content = descompilarScript(line.substring(corpusBeg + 1, corpusEnd - 1));
         resultado.remainder = line.substring(corpusEnd + 1);
 
         for (var index = 0; index < resultado.parameters.length; index++) {
@@ -726,7 +916,7 @@ const tigerScript = (str) => {
 
     // Extraer la importación en la variable por referencia comentario y devolver el resto... ok
     function esImportacion(line) {
-        return begin(line.trim(), "import"); // fix
+        return comienzaCon(line.trim(), "import"); // fix
     }
 
     // Extraer la importación en la variable por referencia comentario y devolver el resto... ok
@@ -802,7 +992,7 @@ const tigerScript = (str) => {
             line = line.substring(posicionFinBloque + 1);
             resultado = {
                 type: "block",
-                body: tigerScript(contenido),
+                body: descompilarScript(contenido),
                 remainder: line.substring(sintaxCheck(line, line.indexOf("{")) + 1)
             };
         }
@@ -837,7 +1027,7 @@ const tigerScript = (str) => {
 
     function esSimbolo(line) {
         // Determinar si es un operador
-        const simbolos = [";", ".", "@", "#", "$", "%", "^", "&", "*", "~", ":", "{", "}", "="];
+        const simbolos = [";", ".", "@", "#", "$", "%", "^", "&", "*", "~", ":", "{", "}", "=","[", "]"];
         var savedLine = line.trim();
         for (var i = 0; i < simbolos.length; i++) {
             if (left(savedLine, String(simbolos[i]).length) === simbolos[i]) {
@@ -1009,7 +1199,7 @@ const inyectarAtributos = (parsing, atributo) => {
     const clase = parsing.find((item) => item.type === "class");
     const body = clase.body;
     const pc = body.findIndex((element) => element.type === "constructor");
-    const decompilacion = tigerScript(atributo);
+    const decompilacion = descompilarScript(atributo);
 
     if (pc !== -1) {
         for (let index = 0; index < decompilacion.length; index++) {
@@ -1079,7 +1269,8 @@ module.exports = {
     entidades,
     entidadesR,
     esquemas,
-    tigerScript,
+    transformar,
+    descompilarScript,
     compileScript,
     inyectarImportaciones,
     inyectarAtributos,

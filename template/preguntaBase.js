@@ -13,4 +13,4 @@ const preguntaBase = async (...pregunta) => {
     }
     return preguntas;
 };
-module.exports = {preguntaBase,preg};
+module.exports = {preguntaBase};
