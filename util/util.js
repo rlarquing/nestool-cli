@@ -553,7 +553,7 @@ const descompilarScript = (str) => {
             }
         }
         if (posicion === -1 || posicion >= cadena.length) {
-            // here just try to find where comienzaCon some of them...
+            // here just try to find where begin some of them...
             return -1;
         }
         return posicion + 1;
@@ -673,7 +673,7 @@ const descompilarScript = (str) => {
     function esFuncion(line) {
         // Determinar si es una función
         line = line.trim();
-        if (comienzaCon(line, "function")) {
+        if (begin(line, "function")) {
             var firstParBeg = line.indexOf("(");
             if (firstParBeg === -1) return false;
             var firstParEnd = sintaxCheck(line, line.indexOf("("));
@@ -813,13 +813,22 @@ const descompilarScript = (str) => {
         // se agregan los atributos al objeto clase
         var attributes = [];
         var downC = 0;
+        var tipoRelacion = "";
         while (downC < result.body.length - 3) {
+            if (result.body[downC].type === "decorator" && (result.body[downC].content === "@OneToOne" || result.body[downC].content === "@ManyToOne" || result.body[downC].content === "@ManyToMany")) {
+                tipoRelacion = result.body[downC].content;
+            }
             if (result.body[downC].type === "identifier" && result.body[downC + 1].type === "symbol" && result.body[downC + 2].type === "identifier") {
-                attributes.push({
+                let objeto = {
                     type: "attribute",
                     name: result.body[downC].content,
                     kind: result.body[downC + 2].content
-                });
+                };
+                if (tipoRelacion !== "") {
+                    objeto.relation = tipoRelacion;
+                    tipoRelacion = "";
+                }
+                attributes.push(objeto);
                 downC = downC + 3;
             } else {
                 downC++;
@@ -838,7 +847,7 @@ const descompilarScript = (str) => {
     function esConstructorDeClase(line) {
         // Determinar si es una función
         line = line.trim();
-        if (comienzaCon(line, "constructor")) {
+        if (begin(line, "constructor")) {
             var firstParBeg = line.indexOf("(");
             if (firstParBeg === false) return false;
             var firstParEnd = sintaxCheck(line, line.indexOf("("));
@@ -916,7 +925,7 @@ const descompilarScript = (str) => {
 
     // Extraer la importación en la variable por referencia comentario y devolver el resto... ok
     function esImportacion(line) {
-        return comienzaCon(line.trim(), "import"); // fix
+        return begin(line.trim(), "import"); // fix
     }
 
     // Extraer la importación en la variable por referencia comentario y devolver el resto... ok
@@ -1027,7 +1036,7 @@ const descompilarScript = (str) => {
 
     function esSimbolo(line) {
         // Determinar si es un operador
-        const simbolos = [";", ".", "@", "#", "$", "%", "^", "&", "*", "~", ":", "{", "}", "=","[", "]"];
+        const simbolos = [";", ".", "@", "#", "$", "%", "^", "&", "*", "~", ":", "{", "}", "=", "[", "]"];
         var savedLine = line.trim();
         for (var i = 0; i < simbolos.length; i++) {
             if (left(savedLine, String(simbolos[i]).length) === simbolos[i]) {
@@ -1109,6 +1118,7 @@ const descompilarScript = (str) => {
 
     return datos;
 }
+
 
 // Revisar el elemento 20 subíndice 13... el objeto 3 reconoce una llava de cierre como objeto símbolo independiente... recortar ok.
 // para el lunes... comentar la linea de delete remainders y ver en cual recorte falla ...
