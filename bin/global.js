@@ -6,34 +6,50 @@
 // Recuperar el primer argumento
 // var name = args[0];
 
-var myLibrary = require("../lib/index.js");
-const { menu } = require("../lib/menu.js");
-const { dtos } = require("../lib/dtos.js");
+var {estructura, queryParams, msn} = require("../lib");
+const {menu} = require("../lib/menu");
+const {dtos} = require("../lib/dtos");
+const {service} = require("../lib/service");
+const {repository} = require("../lib/repository");
+const {mapper} = require("../lib/mapper");
+const {controller} = require("../lib/controller");
+const {entity} = require("../lib/entity");
+const {formatearArchivos} = require("../util/util");
+const {crud} = require("../lib/crud");
 
 // Crea la estructura de carpetas.
 (async () => {
-  myLibrary.msn("NESTOOL-CLI");
+    msn("NESTOOL-CLI");
 
-  let opt = await menu();
-  switch (opt.opcion) {
-    case "modulo":
-      myLibrary.estructura(await myLibrary.queryParams());
-      break;
+    let opt = await menu();
+    switch (opt.opcion) {
+        case "controlador":
+            await controller();
+            break;
 
-    case "controlador":
-      break;
+        case "dtos":
+            await dtos();
+            break;
 
-    case "dtos":
-      dtos();
-      break;
-
-    case "service":
-      break;
-    case "mapper":
-      break;
-    case "repository":
-      break;
-    case "entity":
-      break;
-  }
+        case "service":
+            await service();
+            break;
+        case "mapper":
+            await mapper();
+            break;
+        case "repository":
+            await repository();
+            break;
+        case "entity":
+            await entity();
+            break;
+        case "crud":
+            await crud();
+            break;
+        case "exit":
+            process.exit(1);
+            break;
+    }
+    await formatearArchivos();
+    process.exit(1);
 })();

@@ -1,18 +1,18 @@
 module.exports=`
 import {Injectable} from '@nestjs/common';
-import {$nameEntity} from '../entity';
-import {$nameRepository} from "../repository";
+import {$nameEntity} from '../../persistence/entity';
+import {$nameRepository} from "../../persistence/repository";
 import {$nameMapper} from "../mapper";
-import {TrazaService} from "../../security/service";
-import {GenericService} from "../../shared/service";
+import {TrazaService} from "./traza.service";
+import {GenericService} from "./generic.service";
 
 @Injectable()
 export class $nameService extends GenericService<$nameEntity> {
     constructor(
-        protected $nameParamRepository: $nameRepository,
-        protected $nameParamMapper: $nameMapper,
+        protected $paramRepository: $nameRepository,
+        protected $paramMapper: $nameMapper,
         protected trazaService: TrazaService,
     ) {
-        super($nameParamRepository, $nameParamMapper, trazaService, true);
+        super($paramRepository, $paramMapper, trazaService, $traza);
     }
 }`;
