@@ -1,6 +1,6 @@
 const genericEntity=`
 import {Column, Entity, $typeorm} from "typeorm";
-import {GenericEntity} from "../../shared/entity";
+import {GenericEntity} from "./generic.entity";
 import { SchemaEnum } from '../../database/schema/schema.enum';
 $import
 

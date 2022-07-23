@@ -7,17 +7,17 @@ import {Create$nameDto, Read$nameDto, Update$nameDto} from "../../shared/dto";
 export class $nameMapper {
 
 async dtoToEntity(create$nameDto: Create$nameDto): Promise<$nameEntity> {
-return new $nameEntity($parametrosdtoToEntity);
+return new $nameEntity($parametrosDtoToEntity);
 }
 
 async dtoToUpdateEntity(update$nameDto: Update$nameDto, update$nameEntity: $nameEntity): Promise<$nameEntity> {
-$analisisdtoToUpdateEntity
+$analisisDtoToUpdateEntity
 return update$nameEntity;
 }
 
 async entityToDto($attrNameEntity: $nameEntity): Promise<Read$nameDto> {
 const dtoToString: string = $attrNameEntity.toString();
-return new Read$nameDto($parametrosentityToDto);
+return new Read$nameDto($parametrosEntityToDto);
 }
 }
 `;
@@ -37,20 +37,20 @@ export class $nameMapper {
 }
 
 async dtoToEntity(create$nameDto: Create$nameDto): Promise<$nameEntity> {
-        $analisisdtoToEntity
-return new $nameEntity($parametrosdtoToEntity);
+        $analisisDtoToEntity
+return new $nameEntity($parametrosDtoToEntity);
 }
 
 async dtoToUpdateEntity(update$nameDto: Update$nameDto, update$nameEntity: $nameEntity): Promise<$nameEntity> {
-$analisisdtoToUpdateEntity
+$analisisDtoToUpdateEntity
 return update$nameEntity;
 }
 
 async entityToDto($attrNameEntity: $nameEntity): Promise<Read$nameDto> {
     const $attrName: $nameEntity = await this.$attrNameRepository.findById($attrNameEntity.id);
- $analisisentityToDto
+ $analisisEntityToDto
 const dtoToString: string = $attrNameEntity.toString();
-return new Read$nameDto($parametrosentityToDto);
+return new Read$nameDto($parametrosEntityToDto);
 }
 }
 `;

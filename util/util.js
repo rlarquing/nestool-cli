@@ -223,7 +223,9 @@ const quitarSeparador = (str, separador) => {
     let resultado = str.split(separador).map(item => aInicialMayuscula(item));
     return resultado.join('');
 }
-
+const formatearNombreEliminarSufijo = (nombre, tipo, separador)=>{
+    return formatearNombre(eliminarSufijo(nombre, tipo), separador);
+}
 const capitalize = (str) => {
     let result = str;
     if (result.length > 0) {
@@ -553,7 +555,7 @@ const descompilarScript = (str) => {
             }
         }
         if (posicion === -1 || posicion >= cadena.length) {
-            // here just try to find where begin some of them...
+            // here just try to find where comienzaCon some of them...
             return -1;
         }
         return posicion + 1;
@@ -673,7 +675,7 @@ const descompilarScript = (str) => {
     function esFuncion(line) {
         // Determinar si es una función
         line = line.trim();
-        if (begin(line, "function")) {
+        if (comienzaCon(line, "function")) {
             var firstParBeg = line.indexOf("(");
             if (firstParBeg === -1) return false;
             var firstParEnd = sintaxCheck(line, line.indexOf("("));
@@ -847,7 +849,7 @@ const descompilarScript = (str) => {
     function esConstructorDeClase(line) {
         // Determinar si es una función
         line = line.trim();
-        if (begin(line, "constructor")) {
+        if (comienzaCon(line, "constructor")) {
             var firstParBeg = line.indexOf("(");
             if (firstParBeg === false) return false;
             var firstParEnd = sintaxCheck(line, line.indexOf("("));
@@ -925,7 +927,7 @@ const descompilarScript = (str) => {
 
     // Extraer la importación en la variable por referencia comentario y devolver el resto... ok
     function esImportacion(line) {
-        return begin(line.trim(), "import"); // fix
+        return comienzaCon(line.trim(), "import"); // fix
     }
 
     // Extraer la importación en la variable por referencia comentario y devolver el resto... ok
@@ -1200,8 +1202,9 @@ const inyectarImportaciones = (parsing, moduleName, modulePath) => {
         encontrado.modules += `,${moduleName}`;
         return parsing;
     } else {
-        return parsing.unshift({ type: "import", modules: String(moduleName), path: String(modulePath) });
+        parsing.unshift({ type: "import", modules: String(moduleName), path: String(modulePath) });
     }
+    return parsing;
 }
 
 // inyectar referencias de importación aun conjuntos de nombres de módulos con sus respectivos caminos
@@ -1247,6 +1250,7 @@ const inyectarParametrosEnConstructor = (parsing, parametros) => {
         pc.content.push({ type: "identifier", content: par.name });
         pc.content.push({ type: "symbol", content: ";" });
     })
+    return parsing;
 }
 
 module.exports = {
@@ -1284,5 +1288,6 @@ module.exports = {
     compileScript,
     inyectarImportaciones,
     inyectarAtributos,
-    inyectarParametrosEnConstructor
+    inyectarParametrosEnConstructor,
+    formatearNombreEliminarSufijo,
 };
