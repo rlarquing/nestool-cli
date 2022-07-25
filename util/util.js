@@ -16,18 +16,11 @@ finder.on("file", function (file) {
 finder.on("directory", function (dir) {
     dirFolders.push(dir);
 });
-const modulos = () => {
-    let listaM = [];
-    dirFolders.forEach((dir) => {
-        listaM.push(dir.substring(dir.indexOf('src')).split(ruta.sep)[1]);
-    });
-    return eliminarDuplicado(listaM).filter((dir) => dir !== '');
-}
 const entidades = () => {
     let listaE = [];
     dirFiles.forEach((file) => {
-        let tmp=file.substring(file.indexOf('entity'),file.indexOf('.entity'));
-        if(tmp.includes('entity')){
+        let tmp = file.substring(file.indexOf('entity'), file.indexOf('.entity'));
+        if (tmp.includes('entity')) {
             listaE.push(tmp.split(ruta.sep)[1]);
         }
 
@@ -37,9 +30,9 @@ const entidades = () => {
 const entidadesR = () => {
     let listaE = [];
     dirFiles.forEach((file) => {
-        let tmp=file.substring(file.indexOf('entity'),file.indexOf('.entity'));
-        if(tmp.includes('entity')){
-            listaE.push(quitarSeparador(tmp.split(ruta.sep)[1],'-')+'Entity');
+        let tmp = file.substring(file.indexOf('entity'), file.indexOf('.entity'));
+        if (tmp.includes('entity')) {
+            listaE.push(quitarSeparador(tmp.split(ruta.sep)[1], '-') + 'Entity');
         }
 
     });
@@ -47,13 +40,14 @@ const entidadesR = () => {
 }
 const esquemas = () => {
     let listaE = [];
-   let dirFile=direccionFichero('schema.enum.ts');
+    let dirFile = direccionFichero('schema.enum.ts');
     let fichero = fs.readFileSync(dirFile, 'utf8');
-    let contenido=fichero.substring(fichero.indexOf('{')+1,fichero.indexOf('}')-1).split(',');
-    listaE=contenido.map((esquema)=>{
-        esquema=esquema.trim();
-        return esquema.substring(0,esquema.indexOf(' '));
-    }).filter((esq) => esq !== '');;
+    let contenido = fichero.substring(fichero.indexOf('{') + 1, fichero.indexOf('}') - 1).split(',');
+    listaE = contenido.map((esquema) => {
+        esquema = esquema.trim();
+        return esquema.substring(0, esquema.indexOf(' '));
+    }).filter((esq) => esq !== '');
+    ;
     return listaE;
 }
 const preguntar = async (questions) => {
@@ -165,10 +159,10 @@ const escapeRegExp = (string) => {
 }
 
 const left = (str, l) => {
-    return str.substr(0, l);
+    return str.substring(0, l);
 }
 const right = (str, l) => {
-    return str.substr(str.length - l, l);
+    return str.substring(str.length - l);
 }
 
 
@@ -179,8 +173,6 @@ const terminaCon = (str, s) => {
 
 const comienzaCon = (str, s) => {
     return left(str, s.length) === s;
-
-
 }
 
 const eliminarSufijo = (str, s) => {
@@ -231,7 +223,9 @@ const quitarSeparador = (str, separador) => {
     let resultado = str.split(separador).map(item => aInicialMayuscula(item));
     return resultado.join('');
 }
-
+const formatearNombreEliminarSufijo = (nombre, tipo, separador)=>{
+    return formatearNombre(eliminarSufijo(nombre, tipo), separador);
+}
 const capitalize = (str) => {
     let result = str;
     if (result.length > 0) {
@@ -312,15 +306,17 @@ function generarColumna(answer) {
     return resultado;
 }
 
-
-const transformar = (objetivo, patronAReconocer, patronAAplicar) => {
+const formatearArchivos = async () => {
+    await exec(`npm run format`);
+};
+function transformar(objetivo, patronAReconocer, patronAAplicar) {
     // Es ua variable si comienza con % y no tiene espacios.
     function esUnaVariable(expr) {
         if (!expr) {
             return false;
         }
 
-        apa = String(expr);
+        let apa = String(expr);
         if ((apa.length < 2)) {
             return false;
         }
@@ -338,7 +334,7 @@ const transformar = (objetivo, patronAReconocer, patronAAplicar) => {
 
     // verdadero si el cáracter es una de esas letras.
     function esAlfabetico(expr) {
-        alphaCheck = /^[a-zA-Z_áéíóúüÁÉÍÓÚÜñÑ]+$/g;
+        let alphaCheck = /^[a-zA-Z_áéíóúüÁÉÍÓÚÜñÑ]+$/g;
         return alphaCheck.test(expr);
     }
 
@@ -351,9 +347,9 @@ const transformar = (objetivo, patronAReconocer, patronAAplicar) => {
     function parsearEnPartes(expr) { // fixed
         expr = String(expr);
 
-        resultado = [];
-        tmp = '';
-        itIsVariable = false;
+        var resultado = [];
+        var tmp = "";
+        var itIsVariable = false;
         expr = String(expr);
         for (i = 0; i < expr.length; i++) {
             if (expr.charAt(i) === '%') {
@@ -380,10 +376,7 @@ const transformar = (objetivo, patronAReconocer, patronAAplicar) => {
     function getVar(cadenaPrincipal, nombreDeVariable, arregloDelAPtronAReconocer) {
         for (i = 0; i < arregloDelAPtronAReconocer.length; i++) {
             if (nombreDeVariable === arregloDelAPtronAReconocer[i].cadena) {
-                return String(cadenaPrincipal).substring(
-                    arregloDelAPtronAReconocer[i].inicio,
-                    arregloDelAPtronAReconocer[i].fin + 1
-                );
+                return String(cadenaPrincipal).substring(arregloDelAPtronAReconocer[i].inicio, arregloDelAPtronAReconocer[i].fin + 1);
             }
         }
         return "";
@@ -393,18 +386,18 @@ const transformar = (objetivo, patronAReconocer, patronAAplicar) => {
     obj = String(objetivo);
 
     // Se inicializa el arreglo (listado) de los resultados.
-    resultado = objetivo;
+    let resultado = objetivo;
 
     if (obj === "" || patronAReconocer === "") {
         // El objetivo está vacío.
         return resultados;
     }
 
-    par = parsearEnPartes(patronAReconocer);
-    paa = parsearEnPartes(patronAAplicar);
+    let par = parsearEnPartes(patronAReconocer);
+    let paa = parsearEnPartes(patronAAplicar);
 
     // Si hay algín literal de patrón a reconocer que no esté el objetivo, te vas clarito
-    baseBusqueda = 0;
+    let baseBusqueda = 0;
     for (j = 0; j < par.length; j++) {
         baseBusqueda = obj.indexOf(par[j], baseBusqueda);
         if (baseBusqueda === -1 && !esUnaVariable(par[j])) {
@@ -419,38 +412,31 @@ const transformar = (objetivo, patronAReconocer, patronAAplicar) => {
     }
 
     // De igual forma, si el último...
-    if (
-        !esUnaVariable(par[par.length - 1]) &&
-        obj.indexOf(
-            par[par.length - 1],
-            obj.length - par[par.length - 1].length
-        ) !==
-        obj.length - par[par.length - 1].length
-    ) {
+    if (!esUnaVariable(par[par.length - 1]) && obj.indexOf(par[par.length - 1], obj.length - par[par.length - 1].length) !== obj.length - par[par.length - 1].length) {
         return objetivo;
     }
 
     if (par.length === 0 || par.length === 0) {
         return resultado;
     } else if (par.length === 1 && esUnaVariable(patronAReconocer)) {
-        resultado = reemplazarCadena(patronAAplicar, patronAReconocer, obj);
+        let resultado = reemplazarCadena(patronAAplicar, patronAReconocer, obj);
         return resultado;
     } else if (paa.length === 1 && !esUnaVariable(patronAAplicar)) {
-        resultado = patronAAplicar;
+        let resultado = patronAAplicar;
         return resultado;
     }
 
-    toTheLeft = 0;
-    toTheRight = par.length - 1;
-    llastPost = 0;
-    parL = new Array(par.length); // Guarda las posiciones de los literales dentro del objetivo...
+    let toTheLeft = 0;
+    let toTheRight = par.length - 1;
+    let llastPost = 0;
+    let parL = new Array(par.length); // Guarda las posiciones de los literales dentro del objetivo...
     for (j = 0; j < par.length; j++) {
         if (!esUnaVariable(par[j])) {
             a = obj.indexOf(par[j], obj, llastPost);
             llastPost = a;
-            parL[j] = {cadena: par[j], inicio: a, fin: a + par[j].length - 1};
+            parL[j] = { cadena: par[j], inicio: a, fin: a + par[j].length - 1 };
         } else {
-            parL[j] = {cadena: par[j], inicio: -1, fin: -1};
+            parL[j] = { cadena: par[j], inicio: -1, fin: -1 };
         }
     }
 
@@ -486,70 +472,792 @@ const transformar = (objetivo, patronAReconocer, patronAAplicar) => {
     return resultado;
 }
 
-const formatearArchivos = async () => {
-    await exec(`npm run format`);
-};
+// verdadero si el cáracter es en un dígito.
+const isNumericAt = (str, position) =>{
+    if (str.length < position + 1) return false;
+    return String("0123456789").indexOf(str.substr(position, 1)) !== -1;
+}
 
-// Para el parser, ending, donde termina (Sintax validator)
-// Función para que, en una cadena, dada una posición., si esta es un
-// carácter de separador de comillas: ', ` o ", encuentre su par correspondiente., al igual que de abrir un
-// paréntesis (, corchete [ o llave {, me devuelva la posición dónde se cierra. Lleva un tratamiento especial,
-// pues debe desactivarse en cadenas internas y comentarios de bloque, también debe tener presente comentarios de una línea.
-// -1 si no lo encuentra, o hay un error de formación.
-const ending = (cadena, posicion) =>  {
-    // Si es una línea de comentarios debe devolver la posición de la siguiente línea.
-    if (posicion >= cadena.length) {
-        return -1;
-    }
-    // pares
-    var pares = [{start: "(", end: ")"},
-        {start: "{", end: "}"},
-        {start: "[", end: "]"}];
-    if (cadena.substr(posicion, 2) === "//") { // Line comment, until CR or EOF
-        var endComment = cadena.indexOf("\n", posicion + 2);
-        if (endComment === -1) {
-            return cadena.length - 1; // y se devuelve hasta el retorno del carro.
+// verdadero si el cáracter es una de esas letras.
+const isAlphabeticAt=(str, position) => {
+    if (str.length < position + 1) return false;
+    return String("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZA@_áéíóúüÁÉÍÓÚÜñÑ").indexOf(str.substr(position, 1)) !== -1;
+}
+
+// verdadero si el cáracter es una letra o un número.
+const isAlphanumericAt = (str, position) => {
+    return isNumericAt(str, position) || isAlphabeticAt(str, position);
+}
+
+// verdadero si el cáracter es igual al argumento...
+const isEqualAt = (str, chr, position) => {
+    if (str.length < position + 1) return false;
+    return (str.substring(position, 1) === chr);
+}
+
+// verdadero si el cáracter es un underscore...
+function isUnderscore(str, position) {
+    return isEqualAt(str, "_", position);
+}
+
+const descompilarScript = (str) => {
+
+    // Sintactical analizer (nexto to where the operator in position ends).
+    function sintaxCheck(cadena, posicion) {
+        // Si es una línea de comentarios debe devolver la posición de la siguiente línea.
+        if (posicion === -1 || posicion >= cadena.length) {
+            return false;
         }
-        return endComment;
-    } else if (cadena.substr(posicion, 2) === "/*") { // Block comment, always until */, or error
-        var endComment = cadena.indexOf("*/", posicion + 2);
-        return endComment; // sino, completo.
-    }
-    // De otro modo
-    switch (cadena[posicion]) {
-        case "'": { // simples
-            posicion = cadena.indexOf("'", posicion + 1);
-            break;
-        }
-        case "`": { // francesas
-            posicion = cadena.indexOf("`", posicion + 1);
-            break;
-        }
-        case '"': { // dobles
-            posicion = cadena.indexOf('"', posicion + 1);
-            break;
-        }
-        default: {
-            for (var i = 0; i < pares.length; i++) {
-                if (cadena.substr(posicion, pares[i].start.length) === pares[i].start) {
-                    posicion = posicion + pares[i].start.length; // reubica el puntero
-                    while ((posicion !== -1) && (posicion < cadena.length)) {
-                        if (cadena.substr(posicion, pares[i].end.length) === pares[i].end) {
-                            return posicion + pares[i].end.length - 1;
-                        }
-                        posicion = ending(cadena, posicion);
-                        if (posicion >= cadena.length) {
-                            break;
+        // pares
+        var pares = [{ start: "(", end: ")" },
+            { start: "{", end: "}" },
+            { start: "[", end: "]" }];
+        if (cadena.substr(posicion, 2) === "//") { // Line comment, until CR or EOF
+            var endComment = cadena.indexOf("\n", posicion + 2);
+            if (endComment === -1) {
+                return cadena.length + 1; // y se devuelve hasta el retorno del carro.
+            }
+            return endComment + 1;
+        } else if (cadena.substr(posicion, 2) === "/*") { // Block comment, always until */, or error
+            var endComment = cadena.indexOf("*/", posicion);
+            posicion = endComment + 2; // sino, completo.
+        } else {
+            // De otro modo
+            switch (cadena[posicion]) {
+                case "'": { // simples
+                    posicion = cadena.indexOf("'", posicion + 1);
+                    break;
+                }
+                case "`": { // francesas
+                    posicion = cadena.indexOf("`", posicion + 1);
+                    break;
+                }
+                case '"': { // dobles
+                    posicion = cadena.indexOf('"', posicion + 1);
+                    break;
+                }
+                default: {
+                    for (var i = 0; i < pares.length; i++) {
+                        if (cadena.substr(posicion, pares[i].start.length) === pares[i].start) {
+                            posicion = posicion + pares[i].start.length; // reubica el puntero
+                            while ((posicion !== -1) && (posicion < cadena.length)) {
+                                if (cadena.substr(posicion, pares[i].end.length) === pares[i].end) {
+                                    return posicion + pares[i].end.length;
+                                }
+                                posicion = sintaxCheck(cadena, posicion);
+                                if (posicion >= cadena.length) {
+                                    break;
+                                }
+                            }
                         }
                     }
                 }
             }
         }
+        if (posicion === -1 || posicion >= cadena.length) {
+            // here just try to find where comienzaCon some of them...
+            return -1;
+        }
+        return posicion + 1;
     }
-    if (posicion === -1 || posicion >= cadena.length) {
-        return -1;
+
+    // TOKEN COMMENT
+    // Verfica que la primera sentencia de la cadena es un comentario correcto., TESTED 13:54|21/04/2022
+    function esComentario(line) {
+        return left(line.trim(), 2) === "//" || ((left(line.trim(), 2) === "/*") && sintaxCheck(line, line.indexOf("//") + 2));
     }
-    return posicion + 1;
+
+    // Extraer comentario en la variable por referencia comentario y devolver el resto... ok
+    function extraerComentario(line, comentario) {
+        comentario = "";
+        var myLine = "";
+        myLine = line.trim();
+        var posicionComentario = sintaxCheck(myLine, 0);
+        comentario = myLine.substring(0, posicionComentario);
+        line = myLine.substr(posicionComentario);
+        return { type: "comment", content: comentario.trim(), remainder: line };
+    }
+
+    // TOKEN STRING
+
+    // Verfica que la primera instancia de cadena esté bien formada y devuelve su posición final., TESTED 13:54|21/04/2022
+    function esCadena(line) {
+        var posicion;
+        for (let index = 0; index < 3; index++) {
+            const stringSeparator = ["'", "`", '"'][index];
+            if (left(line.trim(), 1) === stringSeparator) {
+                posicion = line.indexOf(stringSeparator, line.indexOf(stringSeparator) + 1);
+                if (posicion !== -1) {
+                    return posicion; // eureka
+                }
+            }
+        }
+        return false;
+    }
+
+    // Extraer una cadena en la variable por referencia comentario y devolver el resto... ok
+    function extraerCadena(line) {
+        var isIt = esCadena(line);
+        return {
+            type: "string literal",
+            content: line.substr(0, isIt + 1),
+            remainder: line.substr(isIt + 1)
+        };
+    }
+
+    // TOKEN PARENTHESIS
+
+    // Verfica que el primer elemento sea un paréntesis y que esté correctamente  cerrado
+    function esParenthesis(line) {
+        return left(line.trim(), 1) === "(" && sintaxCheck(line, line.indexOf("(") !== -1);
+    }
+
+    // Extraer comentario en la variable por referencia comentario y devolver el resto... ok
+    function extraerParenthesis(line) {
+        line = String(line);
+        var abreEn = line.indexOf("(");
+        var cierraEn = sintaxCheck(line, abreEn);
+        var cont = descompilarScript(line.substring(abreEn + 1, cierraEn - 1));
+        var resto = line.substring(cierraEn);
+        return { type: "parenthesis", content: cont, remainder: resto };
+    }
+
+    // TOKEN IDENTIFIER
+
+    // Determinar si es un identificador
+    function esIdentificador(line) {
+        if ((!line) || (line.length === 0) || isNumericAt(line, 0)) {
+            return false;
+        }
+        var posicion = 0;
+        while ((posicion < line.length - 1) && isAlphanumericAt(line, posicion)) {
+            posicion++;
+        }
+        return posicion;
+    }
+
+    function extraerIdentificador(line) {
+        if (!line || line.length === 0 || isNumericAt(line, 0)) {
+            return false;
+        }
+        var posicion = esIdentificador(line);
+        var name = line.substr(0, posicion);
+        line = line.substring(posicion);
+        return { type: "identifier", content: name, remainder: line.trim() };
+    }
+
+    // TOKEN CONSTANT
+
+    // Determinar si es un identificador (falta incorporarlo en el parseString, trabajando en esto, ahora...)
+    // const esCadena = (line) => {
+    //     if ((!line) || (line.length === 0) || isNumericAt(line, 0)) {
+    //         return false;
+    //     }
+    //     var posicion = 0;
+    //     while ((posicion < line.length) && isAlphanumericAt(line, posicion)) {
+    //         posicion++;
+    //     }
+    //     return posicion;
+    // }
+
+    // const extraerCadena = (line) => {
+    //     if (!line || line.length === 0 || isNumericAt(line, 0)) {
+    //         return false;
+    //     }
+    //     var posicion = esCadena(line);
+    //     var name = line.substring(0, posicion);
+    //     line = line.substring(posicion + 1);
+    //     return {type: "identifier", content: name, remainder: line.trim()};
+    // }
+
+    // TOKEN FUNCTION (usar este mismo modelo para el while cuando código...)
+
+    function esFuncion(line) {
+        // Determinar si es una función
+        line = line.trim();
+        if (comienzaCon(line, "function")) {
+            var firstParBeg = line.indexOf("(");
+            if (firstParBeg === -1) return false;
+            var firstParEnd = sintaxCheck(line, line.indexOf("("));
+            if (firstParEnd === -1) return false;
+            var corpusBeg = line.indexOf("{");
+            if (corpusBeg === -1 || corpusBeg < firstParEnd) return false;
+            var corpusEnd = sintaxCheck(line, line.indexOf("{"));
+            return true;
+        }
+        return false;
+    }
+
+    function extraerFuncion(line) {
+
+        var firstParBeg = line.indexOf("(");
+        var firstParEnd = sintaxCheck(line, line.indexOf("("));
+        var corpusBeg = line.indexOf("{");
+        if (corpusBeg < firstParEnd) return false;
+        var corpusEnd = sintaxCheck(line, corpusBeg);
+
+        var resultado = {};
+        resultado.type = "function";
+        resultado.name = line.substring(String("function").length, line.firstParBeg - 1).trim();
+        resultado.parameters = line.substring(firstParBeg + 1, firstParEnd).split(",").filter((x) => x.trim() !== "");
+        resultado.content = line.substring(corpusBeg + 1, corpusEnd)
+        resultado.remainder = line.substring(corpusEnd + 1);
+
+        return resultado;
+    }
+
+    // TOKEN CLASS DECLARATION
+
+    // export class FormulaEntity extends GenericEntity implements fulano {
+    // ok tested
+    function obtenerProximoIdentificador(cadena) {
+        if (!cadena) {
+            return "";
+        }
+        var tmp = String(cadena).trim();
+        if ((tmp.length === 0) || isNumericAt(tmp, 0)) {
+            return "";
+        }
+        var posicion = 1;
+        var result = "";
+        while ((posicion < tmp.length) && isAlphanumericAt(tmp, posicion)) {
+            posicion++;
+        }
+        if (esIdentificador(tmp)) {
+            result = tmp.substring(0, posicion).trim();
+        }
+        return result;
+
+    }
+
+    // recortar por la izquierda a la cadena, con tantos caracteres como aparezcan el caracteres... ok tested
+    function recortarPorlaIzquierda(cadena, caracteres) {
+        if (!cadena || cadena.length === 0 || caracteres > cadena.length) {
+            return "";
+        }
+        return String(cadena).substring(caracteres);
+    }
+
+    function esDeclaracionDeClase(line) {
+        var next, tmp = line.trim();
+        var lista = [];
+        var result = { name: next, exported: false, extends: null, implements: [] };
+
+        // Parseo rápido de identificadores por espacio antes del primer símbolo
+        next = obtenerProximoIdentificador(tmp);
+        tmp = recortarPorlaIzquierda(tmp, next.length).trim();
+        while (next !== "" && tmp.trim().length !== 0) {
+            lista.push(next);
+            next = obtenerProximoIdentificador(tmp);
+            tmp = recortarPorlaIzquierda(tmp, next.length).trim();
+        }
+        var declaraClase = false;
+        var identificadorDesconocido = false;
+        for (let index = 0; index < lista.length - 1; index++) {
+            const element = lista[index];
+            switch (element) {
+                case "export":
+                case "extends":
+                case "implements": {
+                    break;
+                }
+                case "class": {
+                    declaraClase = true;
+                    break;
+                }
+            }
+        }
+        if (!esBloque(tmp)) return false;
+        return declaraClase && esBloque(tmp) !== -1 ? true : false;
+    }
+
+    function extraerDeclaracionDeClase(line) {
+        var next, tmp = line.trim();
+        var lista = [];
+        var result = { name: next, type: "class", exported: false, extends: null, implements: [] };
+
+        // Parseo rápido de identificadores por espacio antes del primer símbolo
+        next = obtenerProximoIdentificador(tmp);
+        tmp = recortarPorlaIzquierda(tmp, next.length).trim();
+        while (next !== "" && tmp.trim().length !== 0) {
+            lista.push(next);
+            next = obtenerProximoIdentificador(tmp);
+            tmp = recortarPorlaIzquierda(tmp, next.length).trim();
+        }
+        for (let index = 0; index < lista.length - 1; index++) {
+            const element = lista[index];
+            switch (element) {
+                case "export": {
+                    result.exported = true;
+                    break;
+                }
+                case "class": {
+                    result.name = lista[index + 1];
+                    break;
+                }
+                case "extends": {
+                    result.extends = lista[index + 1];
+                    break;
+                }
+                case "implements": {
+                    result.implements.push(lista[index + 1]);
+                    break;
+                }
+            }
+        }
+        result.content = descompilarScript(tmp);
+        if (result.content.length > 0 && result.content[0].type === "block") {
+            result.body = result.content[0].body;
+            delete result.content;
+        }
+        result.remainder = line.substring(1 + sintaxCheck(line, line.indexOf("{")));
+
+        // se agregan los atributos al objeto clase
+        var attributes = [];
+        var downC = 0;
+        var tipoRelacion = "";
+        while (downC < result.body.length - 3) {
+            if (result.body[downC].type === "decorator"){
+                if(result.body[downC].content === "@Column"){
+                    console.log(result.body[downC+1].content[0].body);
+                }
+
+            }
+
+            if (result.body[downC].type === "decorator" && (result.body[downC].content === "@OneToOne" || result.body[downC].content === "@ManyToOne" || result.body[downC].content === "@ManyToMany")) {
+                tipoRelacion = result.body[downC].content;
+            }
+            if (result.body[downC].type === "identifier" && result.body[downC + 1].type === "symbol" && result.body[downC + 2].type === "identifier") {
+                let objeto = {
+                    type: "attribute",
+                    name: result.body[downC].content,
+                    kind: result.body[downC + 2].content
+                };
+                if (tipoRelacion !== "") {
+                    objeto.relation = tipoRelacion;
+                    tipoRelacion = "";
+                }
+                attributes.push(objeto);
+                downC = downC + 3;
+            } else {
+                downC++;
+            }
+        }
+        result.attributes = attributes;
+
+        // Recorrer el body buscando un token de type "identifier", seguidos de "parenthesis"
+        // Cuando lo encuentre, eso es un método... hasta el token de tipo "block"
+
+        return result;
+    }
+
+    // TOKEN CLASS CONSTRUCTOR (que puede estar y a su vez no es un CLASS DECARATION)
+
+    function esConstructorDeClase(line) {
+        // Determinar si es una función
+        line = line.trim();
+        if (comienzaCon(line, "constructor")) {
+            var firstParBeg = line.indexOf("(");
+            if (firstParBeg === false) return false;
+            var firstParEnd = sintaxCheck(line, line.indexOf("("));
+            if (firstParEnd === false) return false;
+            var corpusBeg = line.indexOf("{");
+            if (corpusBeg === false || corpusBeg < firstParEnd) return false;
+            var corpusEnd = sintaxCheck(line, line.indexOf("{"));
+            if (corpusEnd === false) return false;
+            return true;
+        }
+        return false;
+    }
+
+    function extraerConstructorDeClase(line) {
+
+        var firstParBeg = line.indexOf("(");
+        var firstParEnd = sintaxCheck(line, line.indexOf("("));
+        var corpusBeg = line.indexOf("{");
+        if (corpusBeg < firstParEnd) return false;
+        var corpusEnd = sintaxCheck(line, corpusBeg);
+
+        var resultado = {};
+        resultado.type = "constructor";
+        // pueden aparecer parámetros en blanco...
+        resultado.parameters = line.substring(firstParBeg + 1, firstParEnd - 1).split(",").filter((x) => x.trim() !== "");
+        resultado.content = descompilarScript(line.substring(corpusBeg + 1, corpusEnd - 1));
+        resultado.remainder = line.substring(corpusEnd + 1);
+
+        for (var index = 0; index < resultado.parameters.length; index++) {
+            const element = resultado.parameters[index];
+            if (element.indexOf(":") !== -1) {
+                // if the perameter is in typescript, pascal, format? Refactorize
+                resultado.parameters[index] = {
+                    "name": element.substring(0, element.indexOf(":")).trim(),
+                    "type": element.substring(element.indexOf(":") + 1).trim()
+                };
+            } else {
+                resultado.parameters[index] = { "name": element.trim(), "type": null }; // as it was in javascript, now and forever.
+            }
+        }
+
+        return resultado;
+    }
+
+    // TOKEN RESERVED WORD
+
+    function esPalabraReservada(line) {
+        // Determinar si es una palabra reservada
+        const palabrasReservadas = ["abstract", "boolean", "break", "byte", "case", "catch",
+            "class", "const", "do", "for", "function", "if", "let",
+            "return", "var", "while", "char", "continue", "default",
+            "do", "double", "else", "extends", "false", "final", "finally",
+            "float", "for", "implements", "import", "int",
+            "interface", "long", "native", "new", "null", "package", "private",
+            "protected", "public", "short", "static", "super", "switch", "syncronized", "this",
+            "throw", "throws", "transient", "true", "try", "void", "volatile", "rest", "byvalue",
+            "cast", "const", "future", "generic", "goto", "inner", "operator", "outer", "experimental"];
+        var savedLine = line.trim();
+        for (var i = 0; i < palabrasReservadas.length; i++) {
+            if (left(savedLine, String(palabrasReservadas[i]).length) === palabrasReservadas[i]) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    function extraerPalabraReservada(line) {
+        var resultado;
+        resultado = extraerIdentificador(line);
+        resultado.type = "reserved word";
+        return resultado;
+    }
+
+    // TOKEN IMPORT
+
+    // Extraer la importación en la variable por referencia comentario y devolver el resto... ok
+    function esImportacion(line) {
+        return comienzaCon(line.trim(), "import"); // fix
+    }
+
+    // Extraer la importación en la variable por referencia comentario y devolver el resto... ok
+    // recueda que puede darse el caso de: import * from '.'; import identificador1 from '.';
+    function extraerImportaciones(line) {
+        var importaciones = [];
+        var myLine = "";
+        myLine = line.trim();
+        if (esImportacion(line)) {
+            myLine = line.substring(0, line.indexOf(";"));
+            if (!myLine) {
+                throw new Error('La importación no está bien formada o falta el símbolo de ;.')
+            }
+            var imStr = transformar(myLine, "import %a from %b", "%a");
+
+            if (esBloque(imStr)) {
+                imStr = imStr.substring(1, imStr.length - 1).trim();
+            }
+
+            var pathStr = transformar(myLine, "import %a from %b", "%b");
+        }
+        line = line.substring(line.indexOf(";") + 1);
+        var resultado = {};
+        resultado.type = "import";
+        resultado.modules = imStr;
+        resultado.path = pathStr;
+        resultado.remainder = line.trim();
+        return resultado;
+    }
+
+    // DECORATOR IMPORT here
+
+    // Determinar si es un identificador
+    function esDecorador(line) {
+        if ((!line) || (line.length === 0) || isNumericAt(line.trim(), 0)) {
+            return false;
+        }
+        line = line.trim();
+        var posicion = 0;
+        return isEqualAt(line, "@", 0) && isAlphanumericAt(line, 1);
+    }
+
+    // Extraer la importación en la variable por referencia comentario y devolver el resto... ok
+    function extraerDecorador(line) {
+        var resultado;
+        if (esIdentificador(line)) {
+            resultado = extraerIdentificador(line);
+        }
+        if (resultado) {
+            resultado.type = "decorator";
+        }
+        return resultado;
+    }
+
+    // Es un bloque, verificar si es un bloque...
+
+    // Determinar si es un identificador
+    function esBloque(line) {
+        if ((!line) || (line.length === 0)) {
+            return false;
+        }
+        line = line.trim();
+        return (left(line, 1) === "{" && sintaxCheck(line, 0) !== -1);
+    }
+
+    // Extraer la importación en la variable por referencia comentario y devolver el resto... ok
+    function extraerBloque(line) {
+        var resultado;
+        line = line.trim();
+        if (esBloque(line)) {
+            var posicionFinBloque = sintaxCheck(line, 0);
+            var contenido = line.substring(1, posicionFinBloque - 1);
+            line = line.substring(posicionFinBloque + 1);
+            resultado = {
+                type: "block",
+                body: descompilarScript(contenido),
+                remainder: line.substring(sintaxCheck(line, line.indexOf("{")) + 1)
+            };
+        }
+        return resultado;
+    }
+
+    // TOKEN OPERATOR
+
+    function esOperador(line) {
+        // Determinar si es un operador
+        const operadores = ["instanceof", "typeof", ">>>=", ">>>", ">>=", "<>=", "===", "!==", "<=", ">=", "&&", "||", "++", "--", "+=", "-=", "*=", "/=", "%=", "^=", "&=", "!=", "|=", "&", "|", "^", "", "<", ">", "-", "!", "~", "+", "-", "*", "/", "%", ";", ",", "=>"];
+        var savedLine = line.trim();
+        for (var i = 0; i < operadores.length; i++) {
+            if (left(savedLine, operadores[i].length) === operadores[i]) {
+                return operadores[i];
+            }
+        }
+        return false;
+    }
+
+    function extraerOperador(line) {
+        var sysOp = esOperador(line);
+        var resultado = {};
+        resultado.type = "operator";
+        resultado.content = sysOp;
+        line = line.substring(sysOp.length);
+        resultado.remainder = line;
+        return resultado;
+    }
+
+    // TOKEN SYMBOL
+
+    function esSimbolo(line) {
+        // Determinar si es un operador
+        const simbolos = [";", ".", "@", "#", "$", "%", "^", "&", "*", "~", ":", "{", "}", "=", "[", "]", ","];
+        var savedLine = line.trim();
+        for (var i = 0; i < simbolos.length; i++) {
+            if (left(savedLine, String(simbolos[i]).length) === simbolos[i]) {
+                return simbolos[i];
+            }
+        }
+        return false;
+    }
+
+    function extraerSimbolo(line) {
+        var sysOp = esSimbolo(line);
+        var resultado = {};
+        resultado.type = "symbol";
+        resultado.content = sysOp;
+        line = line.substring(sysOp.length);
+        resultado.remainder = line.trim();
+        return resultado;
+    }
+    //main
+    if (!str || str === "") return {};
+    str = String(str).trim();
+    // Primero
+    let datos = [];
+    // Se procesa al entidad completa...
+    var decorators = [];
+    str = str.trim();
+    while (str && str !== "") {
+        // alert(JSON.stringify(datos)); // keep for debug purposes...
+        // eliminar espacios
+        if (esBloque(str)) {
+            datos.push(extraerBloque(str));
+        } else if (esOperador(str)) {
+            datos.push(extraerOperador(str));
+        } else if (esComentario(str)) {
+            datos.push(extraerComentario(str));
+        } else if (esImportacion(str)) {
+            datos.push(extraerImportaciones(str));
+        } else if (esDecorador(str)) {
+            datos.push(extraerDecorador(str));
+        } else if (esSimbolo(str)) {
+            datos.push(extraerSimbolo(str));
+        } else if (esFuncion(str)) {
+            datos.push(extraerFuncion(str));
+        } else if (esConstructorDeClase(str)) {
+            datos.push(extraerConstructorDeClase(str));
+        } else if (esDeclaracionDeClase(str)) {
+            datos.push(extraerDeclaracionDeClase(str));
+            // } else if (esPalabraReservada(str)) {
+            //    datos.push(extraerPalabraReservada(str));
+        } else if (esIdentificador(str)) {
+            datos.push(extraerIdentificador(str));
+        } else if (esCadena(str)) {
+            datos.push(extraerCadena(str));
+        } else if (esParenthesis(str)) {
+            datos.push(extraerParenthesis(str));
+        } else datos.push({ type: "Unknown token", content: str, remainder: "" });
+        // faltan por procesar constantes numéricas, booleanas y de cadena
+        // además de asociarle a los decoradores, el siguiente identificador si existe.
+        // asociarle los paréntesis y los corchetes al identificador anterior.,
+        // en los casos donde sea posible, parsear el contenido en profundidad.
+
+        str = String(datos[datos.length - 1].remainder).trim();
+
+    }
+    // Los decoradores deberían meterse en una lista de decoradores y no agregarse a la lista de datos, aunque sí deberían reducir str por el remainder.
+    // Se deben agregar al próximo elemento si no es de paréntesis, o corchetes...
+    // En caso de que termine el ciclo entonces, si quedaron quedaron decoradores sin asignar, es decir, sin otros objetos asociados...
+    // allí sí se agregan 1 x 1 y no de golpe.
+    // Los paréntesis siempre se agregan al elemento anterior, en la propiedad de tipo lista: parenthesis si no existe ninguno, se ponen de primeros... su contenido también puede que se parsee en profundidad.
+    // Los elementos que se encuentran dentro de los corchetes, también deberían parsearse en profundidad., si son complejos.
+    // Al igual que las directivas y prefijos de alcance, experimental, public, private, export., son condiciones lógicas., que se asocian al próximo elemento.
+
+    // Eliminar los remainders temporales, luego resolver utilizando nua variable global...
+    var lineCounter = 0;
+    while (lineCounter < datos.length) {
+        delete datos[lineCounter].remainder;
+        lineCounter++;
+    }
+
+    return datos;
+}
+
+
+// Revisar el elemento 20 subíndice 13... el objeto 3 reconoce una llava de cierre como objeto símbolo independiente... recortar ok.
+// para el lunes... comentar la linea de delete remainders y ver en cual recorte falla ...
+
+const compileScript = (parsing) => {
+    var lineCounter = 0;
+    var token;
+    var resultado = "";
+    while (lineCounter < parsing.length) {
+        token = parsing[lineCounter];
+        lineCounter++;
+        switch (token.type) {
+            case "symbol": {
+                resultado += token.content;
+                break;
+            }
+            case "comment": {
+                resultado += token.content + "\n";
+                break;
+            }
+            case "decorator": {
+                resultado += token.content;
+                break;
+            }
+            case "parenthesis": {
+                resultado += `(${compileScript(token.content)})\n`;
+                break;
+            }
+            case "import": {
+                resultado += `import {${token.modules}} from ${token.path};\n`;
+                break;
+            }
+            case "class": {
+                if (token.exported) {
+                    resultado += `export class ${token.name} `;
+                } else {
+                    resultado += `class ${token.name} `;
+                }
+                if (token.extends) {
+                    resultado += `extends ${token.extends} `;
+                }
+                if (token.implements.length > 0) {
+                    resultado += `implements ${token.implements.join(",")}`;
+                }
+                resultado += " {\n"; // fix, provisional, el bloque no debería decompilar con llave de cierre.
+                resultado += compileScript(token.body);
+                resultado += "\n}";
+                break;
+            }
+            case "block": {
+                resultado += `{${compileScript(token.body)}}`;
+                break;
+            }
+            case "constructor": {
+                var parametros = [];
+                token.parameters.forEach(element => {
+                    parametros.push(`${element.name}${element.type ? ':' + element.type : ''}`);
+                });
+                resultado += `constructor (${parametros.join(", ")}) {${compileScript(token.content)}}`;
+                break;
+            }
+
+            default: {
+                // alert(JSON.stringify(token));
+                resultado += token.content + " ";
+                break;
+            }
+
+        }
+        // alert(JSON.stringify(resultado));
+    }
+    return resultado;
+}
+
+// inyectar una referencia de importación de un módulo con sus respectivo camino
+const inyectarImportaciones = (parsing, moduleName, modulePath) => {
+    let encontrado = parsing.find((element) => element.path === modulePath);
+    if (encontrado) {
+        encontrado.modules += `,${moduleName}`;
+        return parsing;
+    } else {
+        parsing.unshift({ type: "import", modules: String(moduleName), path: String(modulePath) });
+    }
+    return parsing;
+}
+
+// inyectar referencias de importación aun conjuntos de nombres de módulos con sus respectivos caminos
+const inyectarAtributos = (parsing, atributo) => {
+    const clase = parsing.find((item) => item.type === "class");
+    const body = clase.body;
+    const pc = body.findIndex((element) => element.type === "constructor");
+    const decompilacion = descompilarScript(atributo);
+
+    if (pc !== -1) {
+        for (let index = 0; index < decompilacion.length; index++) {
+            const element = decompilacion[index];
+            body.splice(pc + index, 0, element);
+        }
+
+    } else {
+        let pb = body.findIndex(e => e.type === "block");
+        while (pb > 0 && !(body[pb].type === "symbol" && body[pb].content === ";")) pb--;
+        if (pb === -1) {
+            return parsing.concat(decompilacion);
+        } else {
+            for (let index = 0; index < decompilacion.length; index++) {
+                const element = decompilacion[index];
+                body.splice(pb + 1 + index, 0, element);
+            }
+        }
+
+    }
+    return parsing;
+}
+
+// un arreaglo así: [{name: "nombre", type: "string"}, {name: "edad", type: "Number"}, {name: "sexo", type: "boolean"}]
+const inyectarParametrosEnConstructor = (parsing, parametros) => {
+    const clase = parsing.find((item) => item.type === "class");
+    const body = clase.body;
+    const pc = body.find((element) => element.type === "constructor");
+    pc.parameters = pc.parameters.concat(parametros);
+    parametros.forEach((par) => {
+        pc.content.push({ type: "identifier", content: "this" });
+        pc.content.push({ type: "symbol", content: "." });
+        pc.content.push({ type: "identifier", content: par.name });
+        pc.content.push({ type: "symbol", content: "=" });
+        pc.content.push({ type: "identifier", content: par.name });
+        pc.content.push({ type: "symbol", content: ";" });
+    })
+    return parsing;
 }
 
 module.exports = {
@@ -572,7 +1280,6 @@ module.exports = {
     aInicialMayuscula,
     aInicialMinuscula,
     generarColumna,
-    transformar,
     direccionClassBusquedaInterna,
     right,
     formatearArchivos,
@@ -580,9 +1287,14 @@ module.exports = {
     busquedaInterna,
     findElemento,
     removeFromArr,
-    modulos,
     entidades,
     entidadesR,
     esquemas,
-    ending
+    transformar,
+    descompilarScript,
+    compileScript,
+    inyectarImportaciones,
+    inyectarAtributos,
+    inyectarParametrosEnConstructor,
+    formatearNombreEliminarSufijo,
 };

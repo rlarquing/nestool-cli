@@ -1,5 +1,6 @@
-module.exports=`import {Injectable} from "@nestjs/common";
-import {GenericRepository} from "../../shared/repository/generic.repository";
+module.exports=`
+import {Injectable} from "@nestjs/common";
+import {GenericRepository} from "./generic.repository";
 import {IRepository} from "../../shared/interface";
 import {InjectRepository} from "@nestjs/typeorm";
 import {Repository } from "typeorm";
