@@ -646,29 +646,26 @@ const descompilarScript = (str) => {
         return { type: "identifier", content: name, remainder: line.trim() };
     }
 
-    // TOKEN CONSTANT
+    // TOKEN NUMBER
 
-    // Determinar si es un identificador (falta incorporarlo en el parseString, trabajando en esto, ahora...)
-    // const esCadena = (line) => {
-    //     if ((!line) || (line.length === 0) || isNumericAt(line, 0)) {
-    //         return false;
-    //     }
-    //     var posicion = 0;
-    //     while ((posicion < line.length) && isAlphanumericAt(line, posicion)) {
-    //         posicion++;
-    //     }
-    //     return posicion;
-    // }
+    // Determinar si es un identificador
+    function esNumero(line) {
+        if ((!line) || (line.length === 0) || !isNumericAt(line, 0)) {
+            return false;
+        }
+        var posicion = 0;
+        while (posicion < line.length - 1 && isNumericAt(line, posicion)) {
+            posicion++;
+        }
+        return posicion;
+    }
 
-    // const extraerCadena = (line) => {
-    //     if (!line || line.length === 0 || isNumericAt(line, 0)) {
-    //         return false;
-    //     }
-    //     var posicion = esCadena(line);
-    //     var name = line.substring(0, posicion);
-    //     line = line.substring(posicion + 1);
-    //     return {type: "identifier", content: name, remainder: line.trim()};
-    // }
+    function extraerNumero(line) {
+        var posicion = esNumero(line);
+        var value = line.substr(0, posicion);
+        line = line.substring(posicion);
+        return { type: "number", content: value, remainder: line.trim()};
+    }
 
     // TOKEN FUNCTION (usar este mismo modelo para el while cuando código...)
 
@@ -817,9 +814,9 @@ const descompilarScript = (str) => {
         var downC = 0;
         var tipoRelacion = "";
         while (downC < result.body.length - 3) {
-            if (result.body[downC].type === "decorator"){
-                if(result.body[downC].content === "@Column"){
-                    console.log(result.body[downC+1].content[0].body);
+            if (result.body[downC].type === "decorator") {
+                if (result.body[downC].content === "@Column") {
+                    console.log(result.body[downC + 1].content[0].body);
                 }
 
             }
@@ -934,7 +931,7 @@ const descompilarScript = (str) => {
 
     // Extraer la importación en la variable por referencia comentario y devolver el resto... ok
     function esImportacion(line) {
-        return comienzaCon(line.trim(), "import"); // fix
+        return begin(line.trim(), "import"); // fix
     }
 
     // Extraer la importación en la variable por referencia comentario y devolver el resto... ok
@@ -1099,6 +1096,8 @@ const descompilarScript = (str) => {
             datos.push(extraerIdentificador(str));
         } else if (esCadena(str)) {
             datos.push(extraerCadena(str));
+        } else if (esNumero(str)) {
+            datos.push(extraerNumero(str));
         } else if (esParenthesis(str)) {
             datos.push(extraerParenthesis(str));
         } else datos.push({ type: "Unknown token", content: str, remainder: "" });
@@ -1127,7 +1126,6 @@ const descompilarScript = (str) => {
 
     return datos;
 }
-
 
 // Revisar el elemento 20 subíndice 13... el objeto 3 reconoce una llava de cierre como objeto símbolo independiente... recortar ok.
 // para el lunes... comentar la linea de delete remainders y ver en cual recorte falla ...
