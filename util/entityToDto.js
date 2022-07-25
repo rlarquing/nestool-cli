@@ -1,135 +1,23 @@
 const {
     eliminarSufijo,
-    comienzaCon,
-    right,
     eliminarDuplicado,
     buscarFichero,
-    thisAtributos, formatearNombre, direccionFichero, quitarSeparador, parseString, tigerScript
+    thisAtributos, formatearNombre, direccionFichero, quitarSeparador, descompilarScript
 } = require("./util");
 const ruta = require("path");
 const {busquedaInterna, aInicialMinuscula} = require("../util/util");
-const LineReaderSync = require("line-reader-sync");
 const fs = require("fs");
-let resultados = [];
-
-// analizar la próxima línea
-let pendienteAnalisis = '';
-
-function procesarLineaDeComandos() {
-    // Aquí es cuando parseo
-    // ignoro el constructor
-    let nombreEsquema;
-
-    if (comienzaCon(pendienteAnalisis, 'constructor')) {
-        return false
-    }
-    if (comienzaCon(pendienteAnalisis, '@Entity(')) {
-        let primeraComillaNombre;
-        let segundaComillaNombre;
-        let posicionEsquema;
-        if (pendienteAnalisis.indexOf("'") !== -1) {
-            primeraComillaNombre = pendienteAnalisis.indexOf("'");
-            segundaComillaNombre = pendienteAnalisis.indexOf("'", primeraComillaNombre + 1);
-        } else {
-            primeraComillaNombre = pendienteAnalisis.indexOf('"');
-            segundaComillaNombre = pendienteAnalisis.indexOf('"', primeraComillaNombre + 1);
-        }
-        let primeraComillaEsquema;
-        let segundaComillaEsquema;
-        posicionEsquema = pendienteAnalisis.includes('schema:');
-        if (posicionEsquema) {
-            if (pendienteAnalisis.indexOf("'", posicionEsquema) !== -1) {
-                primeraComillaEsquema = pendienteAnalisis.indexOf("'", posicionEsquema);
-                segundaComillaEsquema = pendienteAnalisis.indexOf("'", primeraComillaEsquema + 1);
-            } else {
-                primeraComillaEsquema = pendienteAnalisis.indexOf('"', posicionEsquema);
-                segundaComillaEsquema = pendienteAnalisis.indexOf('"', primeraComillaEsquema + 1);
-            }
-            nombreEsquema = pendienteAnalisis.substring(primeraComillaEsquema + 1, segundaComillaEsquema);
-        }
-        resultados.push({
-            'nombre': pendienteAnalisis.substring(primeraComillaNombre + 1, segundaComillaNombre),
-            'esquema': nombreEsquema
-        });
-    }
-    if (comienzaCon(pendienteAnalisis, '@Column(')) {
-        let principioNombreAtributo = pendienteAnalisis.indexOf('})') + 1;
-        let finNombreAtributo = pendienteAnalisis.indexOf(':', principioNombreAtributo);
-        let nombreAtributo = pendienteAnalisis.substring(principioNombreAtributo + 1, finNombreAtributo).trim();
-
-        let principioTipoAtributo = pendienteAnalisis.indexOf(':', finNombreAtributo) + 1;
-        let tipoAtributo = pendienteAnalisis.substring(principioTipoAtributo, pendienteAnalisis.indexOf(';')).trim();
-
-        let datosNulabilidad = pendienteAnalisis.includes('nullable');
-        let admitenulos = pendienteAnalisis.includes('nullable: true');
-        resultados.push({
-            'atributo': nombreAtributo,
-            'tipoAtributo': tipoAtributo,
-            'nulabilidad': datosNulabilidad,
-            'admitenulos': admitenulos
-        });
-    }
-    if (comienzaCon(pendienteAnalisis, '@ManyToMany(')) {
-        let principioNombreAtributo = pendienteAnalisis.lastIndexOf(')');
-        let finNombreAtributo = pendienteAnalisis.indexOf(':', principioNombreAtributo);
-        let nombreAtributo = pendienteAnalisis.substring(principioNombreAtributo + 1, finNombreAtributo).trim();
-
-        let principioTipoAtributo = pendienteAnalisis.indexOf(':', finNombreAtributo) + 1;
-        let tipoAtributo = pendienteAnalisis.substring(principioTipoAtributo, pendienteAnalisis.indexOf(';'));
-
-        resultados.push({
-            'atributo': nombreAtributo,
-            'tipoAtributo': 'number[]',
-            'nulabilidad': false,
-            'admitenulos': false,
-            'entidad': tipoAtributo.trim().replace('[]', ''),
-        });
-    }
-    if (comienzaCon(pendienteAnalisis, '@ManyToOne(')) {
-        let principioNombreAtributo = pendienteAnalisis.lastIndexOf(')');
-        let finNombreAtributo = pendienteAnalisis.indexOf(':', principioNombreAtributo);
-        let nombreAtributo = pendienteAnalisis.substring(principioNombreAtributo + 1, finNombreAtributo).trim();
-
-        let principioTipoAtributo = pendienteAnalisis.indexOf(':', finNombreAtributo) + 1;
-        let tipoAtributo = pendienteAnalisis.substring(principioTipoAtributo, pendienteAnalisis.indexOf(';'));
-
-        resultados.push({
-            'atributo': nombreAtributo,
-            'tipoAtributo': 'number',
-            'nulabilidad': false,
-            'admitenulos': false,
-            'entidad': tipoAtributo
-        });
-    }
-    // flush, vacío el buffer hasta que encuentre un ;
-    pendienteAnalisis = '';
-
-}
-
-// ManyToOne y OneToOne, uno a muchos no es necesario...
-
-// Este parsea linea a linea, pero antes se debe crear un nuevoParseo() para reinicializar...
-function leerProximaLinea(datos) {
-    datos = datos.trim();
-    pendienteAnalisis = pendienteAnalisis + datos;
-
-    // No parsea hasta que encuentre un punto y coma
-    if (right(pendienteAnalisis, 1) !== ';') {
-        return;
-    }
-    return procesarLineaDeComandos();
-}
-
+const LineReaderSync = require("line-reader-sync");
 // Esta función me crea los atributos para 3 dto...
 let dto = [];
 let importaciones = [];
 
-function crearDto() {
+function crearDto(entity) {
     dto = [];
     importaciones = [];
     let validadores = ['IsNotEmpty'];
 
-    for (let i = 0; i < resultados.length; i++) {
+    for (let i = 0; i < entity.attributes.length; i++) {
         if (resultados[i].atributo) {
             // hay referencia a datos de nulabilidad
             if (resultados[i].nulabilidad) {
@@ -174,7 +62,7 @@ function crearDto() {
 }
 
 // Esta función me crea el read DTO...
-function crearReadDto(moduleName) {
+function crearReadDto(entity) {
     dto = [];
     importaciones = [];
     let parametros = [];
@@ -269,25 +157,19 @@ function crearReadDto(moduleName) {
 
 // y este último ya te construye el a partir de un arreglo original
 const generarDto = (dir) => {
-    let fichero = fs.readFileSync(dir, 'utf8');
-
-    return tigerScript(fichero);
-}
-
-const generarReadDto = (dir, moduleName) => {
     const lrs = new LineReaderSync(dir);
     let lineas = lrs.toLines();
-    // ejemplo, primero comienzas un nuevo parseo, despues linea a linea hasta que llegues a la última
-    //nuevoParseo();
-    // Leer las lineas una a una
-    for (let index = 0; index < lineas.length; index++) {
-        const element = lineas[index];
-        leerProximaLinea(element);
-    }
-    procesarLineaDeComandos(); // procesar aunque no terminea en ;
+    const parse =  descompilarScript(lineas.join(''));
+    const entity = parse.find((item) => item.type === 'class');
+    return crearDto(entity);
+}
 
-    // te crea algo parecido a una precompilación en resultados con todos los elementos para armar el dto
-    return crearReadDto(moduleName);
+const generarReadDto = (dir) => {
+    const lrs = new LineReaderSync(dir);
+    let lineas = lrs.toLines();
+    const parse =  descompilarScript(lineas.join(''));
+    const entity = parse.find((item) => item.type === 'class');
+    return crearReadDto(entity);
 }
 
 module.exports = {generarDto, generarReadDto};

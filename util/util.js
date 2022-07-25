@@ -817,6 +817,13 @@ const descompilarScript = (str) => {
         var downC = 0;
         var tipoRelacion = "";
         while (downC < result.body.length - 3) {
+            if (result.body[downC].type === "decorator"){
+                if(result.body[downC].content === "@Column"){
+                    console.log(result.body[downC+1].content[0].body);
+                }
+
+            }
+
             if (result.body[downC].type === "decorator" && (result.body[downC].content === "@OneToOne" || result.body[downC].content === "@ManyToOne" || result.body[downC].content === "@ManyToMany")) {
                 tipoRelacion = result.body[downC].content;
             }
@@ -1038,7 +1045,7 @@ const descompilarScript = (str) => {
 
     function esSimbolo(line) {
         // Determinar si es un operador
-        const simbolos = [";", ".", "@", "#", "$", "%", "^", "&", "*", "~", ":", "{", "}", "=", "[", "]"];
+        const simbolos = [";", ".", "@", "#", "$", "%", "^", "&", "*", "~", ":", "{", "}", "=", "[", "]", ","];
         var savedLine = line.trim();
         for (var i = 0; i < simbolos.length; i++) {
             if (left(savedLine, String(simbolos[i]).length) === simbolos[i]) {
