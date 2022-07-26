@@ -136,7 +136,7 @@ const thisAtributos = (parametros) => {
     let param;
     parametros.forEach((parametro) => {
         param = parametro.substring(0, parametro.indexOf(':'));
-        resultados.push(`this.${param} = ${param};`);
+        resultados.push(`this.${param.split('?')[0]} = ${param.split('?')[0]};`);
     });
     return resultados;
 };
@@ -223,7 +223,7 @@ const quitarSeparador = (str, separador) => {
     let resultado = str.split(separador).map(item => aInicialMayuscula(item));
     return resultado.join('');
 }
-const formatearNombreEliminarSufijo = (nombre, tipo, separador)=>{
+const formatearNombreEliminarSufijo = (nombre, tipo, separador) => {
     return formatearNombre(eliminarSufijo(nombre, tipo), separador);
 }
 const capitalize = (str) => {
@@ -309,6 +309,7 @@ function generarColumna(answer) {
 const formatearArchivos = async () => {
     await exec(`npm run format`);
 };
+
 function transformar(objetivo, patronAReconocer, patronAAplicar) {
     // Es ua variable si comienza con % y no tiene espacios.
     function esUnaVariable(expr) {
@@ -434,9 +435,9 @@ function transformar(objetivo, patronAReconocer, patronAAplicar) {
         if (!esUnaVariable(par[j])) {
             a = obj.indexOf(par[j], obj, llastPost);
             llastPost = a;
-            parL[j] = { cadena: par[j], inicio: a, fin: a + par[j].length - 1 };
+            parL[j] = {cadena: par[j], inicio: a, fin: a + par[j].length - 1};
         } else {
-            parL[j] = { cadena: par[j], inicio: -1, fin: -1 };
+            parL[j] = {cadena: par[j], inicio: -1, fin: -1};
         }
     }
 
@@ -473,15 +474,15 @@ function transformar(objetivo, patronAReconocer, patronAAplicar) {
 }
 
 // verdadero si el cáracter es en un dígito.
-const isNumericAt = (str, position) =>{
+const isNumericAt = (str, position) => {
     if (str.length < position + 1) return false;
     return String("0123456789").indexOf(str.substr(position, 1)) !== -1;
 }
 
 // verdadero si el cáracter es una de esas letras.
-const isAlphabeticAt=(str, position) => {
+const isAlphabeticAt = (str, position) => {
     if (str.length < position + 1) return false;
-    return String("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZA@_áéíóúüÁÉÍÓÚÜñÑ").indexOf(str.substr(position, 1)) !== -1;
+    return String("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZA@_áéíóúüÁÉÍÓÚÜñÑ?").indexOf(str.substr(position, 1)) !== -1;
 }
 
 // verdadero si el cáracter es una letra o un número.
@@ -509,9 +510,9 @@ const descompilarScript = (str) => {
             return false;
         }
         // pares
-        var pares = [{ start: "(", end: ")" },
-            { start: "{", end: "}" },
-            { start: "[", end: "]" }];
+        var pares = [{start: "(", end: ")"},
+            {start: "{", end: "}"},
+            {start: "[", end: "]"}];
         if (cadena.substr(posicion, 2) === "//") { // Line comment, until CR or EOF
             var endComment = cadena.indexOf("\n", posicion + 2);
             if (endComment === -1) {
@@ -575,7 +576,7 @@ const descompilarScript = (str) => {
         var posicionComentario = sintaxCheck(myLine, 0);
         comentario = myLine.substring(0, posicionComentario);
         line = myLine.substr(posicionComentario);
-        return { type: "comment", content: comentario.trim(), remainder: line };
+        return {type: "comment", content: comentario.trim(), remainder: line};
     }
 
     // TOKEN STRING
@@ -619,7 +620,7 @@ const descompilarScript = (str) => {
         var cierraEn = sintaxCheck(line, abreEn);
         var cont = descompilarScript(line.substring(abreEn + 1, cierraEn - 1));
         var resto = line.substring(cierraEn);
-        return { type: "parenthesis", content: cont, remainder: resto };
+        return {type: "parenthesis", content: cont, remainder: resto};
     }
 
     // TOKEN IDENTIFIER
@@ -643,7 +644,7 @@ const descompilarScript = (str) => {
         var posicion = esIdentificador(line);
         var name = line.substr(0, posicion);
         line = line.substring(posicion);
-        return { type: "identifier", content: name, remainder: line.trim() };
+        return {type: "identifier", content: name, remainder: line.trim()};
     }
 
     // TOKEN NUMBER
@@ -664,7 +665,7 @@ const descompilarScript = (str) => {
         var posicion = esNumero(line);
         var value = line.substr(0, posicion);
         line = line.substring(posicion);
-        return { type: "number", content: value, remainder: line.trim()};
+        return {type: "number", content: value, remainder: line.trim()};
     }
 
     // TOKEN FUNCTION (usar este mismo modelo para el while cuando código...)
@@ -738,7 +739,7 @@ const descompilarScript = (str) => {
     function esDeclaracionDeClase(line) {
         var next, tmp = line.trim();
         var lista = [];
-        var result = { name: next, exported: false, extends: null, implements: [] };
+        var result = {name: next, exported: false, extends: null, implements: []};
 
         // Parseo rápido de identificadores por espacio antes del primer símbolo
         next = obtenerProximoIdentificador(tmp);
@@ -771,7 +772,7 @@ const descompilarScript = (str) => {
     function extraerDeclaracionDeClase(line) {
         var next, tmp = line.trim();
         var lista = [];
-        var result = { name: next, type: "class", exported: false, extends: null, implements: [] };
+        var result = {name: next, type: "class", exported: false, extends: null, implements: []};
 
         // Parseo rápido de identificadores por espacio antes del primer símbolo
         next = obtenerProximoIdentificador(tmp);
@@ -812,17 +813,35 @@ const descompilarScript = (str) => {
         // se agregan los atributos al objeto clase
         var attributes = [];
         var downC = 0;
-        var tipoRelacion = "";
+        let tipoRelacion = "";
+        let nulabilidad = false;
+        let nullable = false;
         while (downC < result.body.length - 3) {
-            if (result.body[downC].type === "decorator") {
-                if (result.body[downC].content === "@Column") {
-                    console.log(result.body[downC + 1].content[0].body);
+            if (result.body[downC].type === "decorator" && result.body[downC].content === "@Column") {
+                let bloques = result.body[downC + 1].content;
+                for (let i = 0; i < bloques.length; i++) {
+                    if(bloques[i].body.some(item => item.content === 'nullable')){
+                        let pos = bloques[i].body.findIndex(item => item.content === 'nullable');
+                        nulabilidad = (pos !== -1);
+                        if (nulabilidad) {
+                            nullable = bloques[i].body[pos + 2].content;
+                        }
+                    }
                 }
-
             }
 
-            if (result.body[downC].type === "decorator" && (result.body[downC].content === "@OneToOne" || result.body[downC].content === "@ManyToOne" || result.body[downC].content === "@ManyToMany")) {
+            if (result.body[downC].type === "decorator" && (result.body[downC].content === "@OneToOne" || result.body[downC].content === "@ManyToOne" || result.body[downC].content === "@ManyToMany" || result.body[downC].content === "@OneToMany")) {
                 tipoRelacion = result.body[downC].content;
+                let bloques = result.body[downC + 1].content;
+                for (let i = 0; i < bloques.length; i++) {
+                    if (bloques[i].type === 'block' && bloques[i].body.some(item => item.content === 'nullable')) {
+                        let pos = bloques[i].body.findIndex(item => item.content === 'nullable');
+                        nulabilidad = (pos !== -1);
+                        if (nulabilidad) {
+                            nullable = bloques[i].body[pos + 2].content;
+                        }
+                    }
+                }
             }
             if (result.body[downC].type === "identifier" && result.body[downC + 1].type === "symbol" && result.body[downC + 2].type === "identifier") {
                 let objeto = {
@@ -834,6 +853,10 @@ const descompilarScript = (str) => {
                     objeto.relation = tipoRelacion;
                     tipoRelacion = "";
                 }
+                if (nulabilidad) {
+                    objeto.nullable = nullable;
+                }
+                nulabilidad=false;
                 attributes.push(objeto);
                 downC = downC + 3;
             } else {
@@ -891,7 +914,7 @@ const descompilarScript = (str) => {
                     "type": element.substring(element.indexOf(":") + 1).trim()
                 };
             } else {
-                resultado.parameters[index] = { "name": element.trim(), "type": null }; // as it was in javascript, now and forever.
+                resultado.parameters[index] = {"name": element.trim(), "type": null}; // as it was in javascript, now and forever.
             }
         }
 
@@ -931,7 +954,7 @@ const descompilarScript = (str) => {
 
     // Extraer la importación en la variable por referencia comentario y devolver el resto... ok
     function esImportacion(line) {
-        return begin(line.trim(), "import"); // fix
+        return comienzaCon(line.trim(), "import"); // fix
     }
 
     // Extraer la importación en la variable por referencia comentario y devolver el resto... ok
@@ -1042,7 +1065,7 @@ const descompilarScript = (str) => {
 
     function esSimbolo(line) {
         // Determinar si es un operador
-        const simbolos = [";", ".", "@", "#", "$", "%", "^", "&", "*", "~", ":", "{", "}", "=", "[", "]", ","];
+        const simbolos = [";", ".", "@", "#", "$", "%", "^", "&", "*", "~", ":", "{", "}", "=", "[", "]", ",", ">", "<"];
         var savedLine = line.trim();
         for (var i = 0; i < simbolos.length; i++) {
             if (left(savedLine, String(simbolos[i]).length) === simbolos[i]) {
@@ -1061,6 +1084,7 @@ const descompilarScript = (str) => {
         resultado.remainder = line.trim();
         return resultado;
     }
+
     //main
     if (!str || str === "") return {};
     str = String(str).trim();
@@ -1100,7 +1124,7 @@ const descompilarScript = (str) => {
             datos.push(extraerNumero(str));
         } else if (esParenthesis(str)) {
             datos.push(extraerParenthesis(str));
-        } else datos.push({ type: "Unknown token", content: str, remainder: "" });
+        } else datos.push({type: "Unknown token", content: str, remainder: ""});
         // faltan por procesar constantes numéricas, booleanas y de cadena
         // además de asociarle a los decoradores, el siguiente identificador si existe.
         // asociarle los paréntesis y los corchetes al identificador anterior.,
@@ -1207,7 +1231,7 @@ const inyectarImportaciones = (parsing, moduleName, modulePath) => {
         encontrado.modules += `,${moduleName}`;
         return parsing;
     } else {
-        parsing.unshift({ type: "import", modules: String(moduleName), path: String(modulePath) });
+        parsing.unshift({type: "import", modules: String(moduleName), path: String(modulePath)});
     }
     return parsing;
 }
@@ -1248,12 +1272,12 @@ const inyectarParametrosEnConstructor = (parsing, parametros) => {
     const pc = body.find((element) => element.type === "constructor");
     pc.parameters = pc.parameters.concat(parametros);
     parametros.forEach((par) => {
-        pc.content.push({ type: "identifier", content: "this" });
-        pc.content.push({ type: "symbol", content: "." });
-        pc.content.push({ type: "identifier", content: par.name });
-        pc.content.push({ type: "symbol", content: "=" });
-        pc.content.push({ type: "identifier", content: par.name });
-        pc.content.push({ type: "symbol", content: ";" });
+        pc.content.push({type: "identifier", content: "this"});
+        pc.content.push({type: "symbol", content: "."});
+        pc.content.push({type: "identifier", content: par.name});
+        pc.content.push({type: "symbol", content: "="});
+        pc.content.push({type: "identifier", content: par.name});
+        pc.content.push({type: "symbol", content: ";"});
     })
     return parsing;
 }

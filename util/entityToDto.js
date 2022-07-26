@@ -1,8 +1,7 @@
 const {
     eliminarSufijo,
     eliminarDuplicado,
-    buscarFichero,
-    thisAtributos, formatearNombre, direccionFichero, quitarSeparador, descompilarScript
+    thisAtributos, formatearNombre, direccionFichero, quitarSeparador, descompilarScript, aInicialMayuscula
 } = require("./util");
 const ruta = require("path");
 const {busquedaInterna, aInicialMinuscula} = require("../util/util");
@@ -11,53 +10,72 @@ const LineReaderSync = require("line-reader-sync");
 // Esta función me crea los atributos para 3 dto...
 let dto = [];
 let importaciones = [];
+let swagger = [];
 
 function crearDto(entity) {
     dto = [];
     importaciones = [];
+    swagger = [];
     let validadores = ['IsNotEmpty'];
-
     for (let i = 0; i < entity.attributes.length; i++) {
-        if (resultados[i].atributo) {
-            // hay referencia a datos de nulabilidad
-            if (resultados[i].nulabilidad) {
-                if (!resultados[i].admitenulos) {
+        if (entity.attributes[i].relation === undefined || !entity.attributes[i].relation.includes('OneToMany')) {
+            if (entity.attributes[i].hasOwnProperty('nullable')) {
+                if (entity.attributes[i].nullable === 'false') {
                     dto.push('@IsNotEmpty()');
                 }
             }
-            if (resultados[i].tipoAtributo.includes('[]')) {
-                dto.push(`@IsArray({message: 'El atributo ${resultados[i].atributo} debe de ser un arreglo'})`);
+            if (entity.attributes[i].name.includes('?')) {
+                dto.push('@IsOptional()');
+                validadores.push("IsOptional");
+                swagger.push("ApiPropertyOptional");
+            }
+            if (entity.attributes[i].hasOwnProperty('relation') && entity.attributes[i].relation.includes('ManyToMany')) {
+                dto.push(`@IsArray({message: 'El atributo ${entity.attributes[i].name} debe de ser un arreglo'})`);
                 validadores.push("IsArray");
             }
-            if (resultados[i].tipoAtributo === "number") {
-                dto.push(`@IsNumber({},{message: 'El atributo ${resultados[i].atributo} debe ser un número'})`);
+            if (entity.attributes[i].kind === "number") {
+                dto.push(`@IsNumber({},{message: 'El atributo ${entity.attributes[i].name} debe ser un número'})`);
                 validadores.push("IsNumber");
             }
-            if (resultados[i].tipoAtributo === "string") {
-                dto.push(`@IsString({message: 'El atributo ${resultados[i].atributo} debe ser un texto'})`);
+            if (entity.attributes[i].kind === "string") {
+                dto.push(`@IsString({message: 'El atributo ${entity.attributes[i].name} debe ser un texto'})`);
                 validadores.push("IsString");
             }
-            if (resultados[i].tipoAtributo === "Date") {
-                dto.push(`@IsDate({message: 'El atributo ${resultados[i].atributo} debe de ser formato válido'})\n
+            if (entity.attributes[i].kind === "Date") {
+                dto.push(`@IsDate({message: 'El atributo ${entity.attributes[i].name} debe de ser formato válido'})\n
                     @Type(() => Date)
                     \n`);
                 validadores.push("IsDate");
                 importaciones.push("import { Type } from 'class-transformer';");
             }
-            if (resultados[i].tipoAtributo === "boolean") {
-                dto.push(`@IsBoolean({message: 'El atributo ${resultados[i].atributo} debe de ser un boolean'})\n`);
+            if (entity.attributes[i].kind === "boolean") {
+                dto.push(`@IsBoolean({message: 'El atributo ${entity.attributes[i].name} debe de ser un boolean'})\n`);
                 validadores.push("IsBoolean");
             }
-            dto.push(`@ApiProperty({description: 'Aquí escriba una descripción para el atributo ${resultados[i].atributo}', example: 'Aquí una muestra para ese atributo'})`);
-            dto.push(resultados[i].atributo + ": " + resultados[i].tipoAtributo + ";");
+            if (entity.attributes[i].name.includes('?')) {
+                dto.push(`@ApiPropertyOptional({description: 'Aquí escriba una descripción para el atributo ${entity.attributes[i].name.split('?')[0]}', example: 'Aquí una muestra para ese atributo'})`);
+            } else {
+                dto.push(`@ApiProperty({description: 'Aquí escriba una descripción para el atributo ${entity.attributes[i].name}', example: 'Aquí una muestra para ese atributo'})`);
+            }
+
+            if (entity.attributes[i].hasOwnProperty('relation') && entity.attributes[i].relation.includes('ManyToMany')) {
+                dto.push(entity.attributes[i].name + ": number[];");
+            } else if (entity.attributes[i].hasOwnProperty('relation') && (entity.attributes[i].relation.includes('ManyToOne') || entity.attributes[i].relation.includes('OneToOne'))) {
+                dto.push(entity.attributes[i].name + ": number;");
+            } else {
+                dto.push(entity.attributes[i].name + ": " + entity.attributes[i].kind + ";");
+            }
         }
+
     }
     validadores = eliminarDuplicado(validadores);
 
     return {
         import: importaciones.join(),
         atributos: dto.join('\n'),
-        validadores: validadores.toString()
+        validadores: validadores.toString(),
+        swagger
+
     }
 }
 
@@ -65,93 +83,76 @@ function crearDto(entity) {
 function crearReadDto(entity) {
     dto = [];
     importaciones = [];
+    swagger = [];
     let parametros = [];
-    let impDto = new Map();
-    let modulos = {};
     let rutaNomenclador = ruta.normalize(direccionFichero("nomenclador-type.enum.ts"));
 
-    for (let i = 0; i < resultados.length; i++) {
-        if (resultados[i].entidad) {
-            let nombre = formatearNombre(eliminarSufijo(resultados[i].entidad.trim(), 'Entity'), '-');
-            let esNomenclador = busquedaInterna(rutaNomenclador, aInicialMinuscula(eliminarSufijo(resultados[i].entidad.trim(), 'Entity')));
-            let nombreDto;
-            if (esNomenclador) {
-                nombreDto = `read-nomenclador.dto.ts`;
-            } else {
-                nombreDto = `read-${nombre}.dto.ts`;
+    for (let i = 0; i < entity.attributes.length; i++) {
+        if (entity.attributes[i].relation === undefined || !entity.attributes[i].relation.includes('OneToMany')) {
+            if (entity.attributes[i].name.includes('?')) {
+                swagger.push("ApiPropertyOptional");
             }
-            let direccion;
-            if (buscarFichero(nombreDto)) {
-                direccion = direccionFichero(nombreDto);
-            }
-            let nombreModulo = '';
-            if (direccion.includes('src')) {
-                nombreModulo = direccion.substring(direccion.indexOf('src') + 4, direccion.indexOf('dto') - 1)
-            }
-            if(moduleName==='nomenclator'){
-                parametros.push('nombre: string, descripcion: string');
-            }
-            if (nombreModulo === moduleName && !esNomenclador) {
-                importaciones.push(`import { Read${quitarSeparador(nombre, '-')}Dto } from './${nombre}.dto';`);
-            } else if (esNomenclador) {
-                if (nombreModulo === moduleName) {
-                    importaciones.push(`import { ReadNomencladorDto } from "./read-nomenclador.dto";`);
+            if (entity.attributes[i].kind.includes('Entity')) {
+                let nombre = formatearNombre(eliminarSufijo(entity.attributes[i].kind, 'Entity'), '-');
+                let esNomenclador = busquedaInterna(rutaNomenclador, aInicialMinuscula(eliminarSufijo(entity.attributes[i].kind, 'Entity')));
+                let nombreDto;
+                if (esNomenclador) {
+                    nombreDto = `read-nomenclador.dto.ts`;
                 } else {
-                    importaciones.push(`import { ReadNomencladorDto } from "../../nomenclator/dto";`);
+                    nombreDto = `read-${nombre}.dto.ts`;
                 }
-            } else {
-                if (!modulos.hasOwnProperty('importacion')) {
-                    modulos = {
-                        importacion: []
+
+                if (esNomenclador) {
+                    parametros.push('nombre: string, descripcion: string');
+                }
+                if (!esNomenclador) {
+                    importaciones.push(`import { Read${quitarSeparador(nombre, '-')}Dto } from './${nombre}.dto';`);
+                } else {
+                    importaciones.push(`import { ReadNomencladorDto } from "./read-nomenclador.dto";`);
+                }
+
+                if (entity.attributes[i].name.includes('?')) {
+                    dto.push(`@ApiPropertyOptional({description: 'Aquí escriba una descripción para el atributo ${entity.attributes[i].name.split('?')[0]}', example: 'Aquí una muestra para ese atributo'})`);
+                } else {
+                    dto.push(`@ApiProperty({description: 'Aquí escriba una descripción para el atributo ${entity.attributes[i].name}', example: 'Aquí una muestra para ese atributo'})`);
+                }
+
+                if (esNomenclador) {
+                    if (entity.attributes[i].hasOwnProperty('relation') && entity.attributes[i].relation.includes('ManyToMany')) {
+                        dto.push(entity.attributes[i].name + ": ReadNomencladorDto[];");
+                        parametros.push(entity.attributes[i].name + ": ReadNomencladorDto[]");
+                    } else {
+                        dto.push(entity.attributes[i].atributo + ": ReadNomencladorDto;");
+                        parametros.push(entity.attributes[i].atributo + ": ReadNomencladorDto");
+                    }
+                } else {
+                    if (entity.attributes[i].hasOwnProperty('relation') && entity.attributes[i].relation.includes('ManyToMany')) {
+                        dto.push(entity.attributes[i].name + ": Read" + aInicialMayuscula(quitarSeparador(nombre, '-')) + "Dto[];");
+                        parametros.push(entity.attributes[i].name + ": Read" + aInicialMayuscula(quitarSeparador(nombre, '-')) + "Dto[]");
+                    } else if (entity.attributes[i].hasOwnProperty('relation') && (entity.attributes[i].relation.includes('ManyToOne') || entity.attributes[i].relation.includes('OneToOne'))) {
+                        dto.push(entity.attributes[i].name + ": Read" + aInicialMayuscula(quitarSeparador(nombre, '-')) + "Dto;");
+                        parametros.push(entity.attributes[i].name + ": Read" + aInicialMayuscula(quitarSeparador(nombre, '-')) + "Dto");
                     }
                 }
-                if (impDto.has(nombreModulo)) {
-                    impDto.set(nombreModulo, impDto.get(nombreModulo).importacion.push(`Read${quitarSeparador(nombre, '-')}Dto`));
-                } else {
-                    modulos.importacion.push(`Read${quitarSeparador(nombre, '-')}Dto`);
-                    impDto.set(nombreModulo, modulos);
-                }
-            }
-
-            dto.push(`@ApiProperty({description: 'Aquí escriba una descripción para el atributo ${resultados[i].atributo}', example: 'Aquí una muestra para ese atributo'})`);
-
-            if (esNomenclador) {
-                if (resultados[i].tipoAtributo.includes('[]')) {
-                    dto.push(resultados[i].atributo + ": ReadNomencladorDto[];");
-                    parametros.push(resultados[i].atributo + ": ReadNomencladorDto[]");
-                } else {
-                    dto.push(resultados[i].atributo + ": ReadNomencladorDto;");
-                    parametros.push(resultados[i].atributo + ": ReadNomencladorDto");
-                }
             } else {
-                if (resultados[i].tipoAtributo.includes('[]')) {
-                    dto.push(resultados[i].atributo + ": Read" + quitarSeparador(nombre, '-') + "Dto[];");
-                    parametros.push(resultados[i].atributo + ": Read" + quitarSeparador(nombre, '-') + "Dto[]");
+                if (entity.attributes[i].name.includes('?')) {
+                    dto.push(`@ApiPropertyOptional({description: 'Aquí escriba una descripción para el atributo ${entity.attributes[i].name.split('?')[0]}', example: 'Aquí una muestra para ese atributo'})`);
                 } else {
-                    dto.push(resultados[i].atributo + ": Read" + nombre + "Dto;");
-                    parametros.push(resultados[i].atributo + ": Read" + quitarSeparador(nombre, '-') + "Dto");
+                    dto.push(`@ApiProperty({description: 'Aquí escriba una descripción para el atributo ${entity.attributes[i].name}', example: 'Aquí una muestra para ese atributo'})`);
                 }
+                dto.push(entity.attributes[i].name + ": " + entity.attributes[i].kind + ";");
+                parametros.push(entity.attributes[i].name + ": " + entity.attributes[i].kind);
             }
-
-        } else if (resultados[i].atributo) {
-            dto.push(`@ApiProperty({description: 'Aquí escriba una descripción para el atributo ${resultados[i].atributo}', example: 'Aquí una muestra para ese atributo'})`);
-            dto.push(resultados[i].atributo + ": " + resultados[i].tipoAtributo + ";");
-            parametros.push(resultados[i].atributo + ": " + resultados[i].tipoAtributo);
         }
     }
     let thisAtrib = thisAtributos(parametros);
-    if (impDto.size > 0) {
-        for (const key of impDto.keys()) {
-            let imp = eliminarDuplicado(impDto.get(key).importacion);
-            importaciones.push(` import { ${imp.toString()}} from '../../${key}/dto';`);
-        }
-    }
     importaciones = eliminarDuplicado(importaciones);
     return {
         import: importaciones.join('\n'),
         atributos: dto.join('\n'),
         parametros: parametros.toString(),
-        thisAtributos: thisAtrib.join('\n')
+        thisAtributos: thisAtrib.join('\n'),
+        swagger
     }
 }
 
@@ -159,7 +160,7 @@ function crearReadDto(entity) {
 const generarDto = (dir) => {
     const lrs = new LineReaderSync(dir);
     let lineas = lrs.toLines();
-    const parse =  descompilarScript(lineas.join(''));
+    const parse = descompilarScript(lineas.join(''));
     const entity = parse.find((item) => item.type === 'class');
     return crearDto(entity);
 }
@@ -167,7 +168,7 @@ const generarDto = (dir) => {
 const generarReadDto = (dir) => {
     const lrs = new LineReaderSync(dir);
     let lineas = lrs.toLines();
-    const parse =  descompilarScript(lineas.join(''));
+    const parse = descompilarScript(lineas.join(''));
     const entity = parse.find((item) => item.type === 'class');
     return crearReadDto(entity);
 }
