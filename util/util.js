@@ -820,7 +820,7 @@ const descompilarScript = (str) => {
             if (result.body[downC].type === "decorator" && result.body[downC].content === "@Column") {
                 let bloques = result.body[downC + 1].content;
                 for (let i = 0; i < bloques.length; i++) {
-                    if(bloques[i].body.some(item => item.content === 'nullable')){
+                    if (bloques[i].body && bloques[i].body.some(item => item.content === 'nullable')) {
                         let pos = bloques[i].body.findIndex(item => item.content === 'nullable');
                         nulabilidad = (pos !== -1);
                         if (nulabilidad) {
@@ -856,7 +856,7 @@ const descompilarScript = (str) => {
                 if (nulabilidad) {
                     objeto.nullable = nullable;
                 }
-                nulabilidad=false;
+                nulabilidad = false;
                 attributes.push(objeto);
                 downC = downC + 3;
             } else {
@@ -1211,10 +1211,17 @@ const compileScript = (parsing) => {
                 resultado += `constructor (${parametros.join(", ")}) {${compileScript(token.content)}}`;
                 break;
             }
+            case 'identifier': {
+                if (token.content.toString().toLowerCase() === "public" || token.content.toString().toLowerCase() === "return") {
+                    resultado += token.content + " ";
+                } else {
+                    resultado += token.content;
+                }
 
+                break;
+            }
             default: {
-                // alert(JSON.stringify(token));
-                resultado += token.content + " ";
+                resultado += token.content;
                 break;
             }
 
@@ -1239,7 +1246,7 @@ const inyectarImportaciones = (parsing, moduleName, modulePath) => {
 // inyectar referencias de importación aun conjuntos de nombres de módulos con sus respectivos caminos
 const inyectarAtributos = (parsing, atributo) => {
     const clase = parsing.find((item) => item.type === "class");
-    const body = clase.body;
+    let body = clase.body;
     const pc = body.findIndex((element) => element.type === "constructor");
     const decompilacion = descompilarScript(atributo);
 
@@ -1253,7 +1260,9 @@ const inyectarAtributos = (parsing, atributo) => {
         let pb = body.findIndex(e => e.type === "block");
         while (pb > 0 && !(body[pb].type === "symbol" && body[pb].content === ";")) pb--;
         if (pb === -1) {
-            return parsing.concat(decompilacion);
+            for (const item of decompilacion) {
+                body.push(item) ;
+            }
         } else {
             for (let index = 0; index < decompilacion.length; index++) {
                 const element = decompilacion[index];
