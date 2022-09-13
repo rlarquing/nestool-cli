@@ -1289,15 +1289,17 @@ const inyectarParametrosEnConstructor = (parsing, parametros) => {
     const clase = parsing.find((item) => item.type === "class");
     const body = clase.body;
     const pc = body.find((element) => element.type === "constructor");
-    pc.parameters = pc.parameters.concat(parametros);
-    parametros.forEach((par) => {
-        pc.content.push({type: "identifier", content: "this"});
-        pc.content.push({type: "symbol", content: "."});
-        pc.content.push({type: "identifier", content: par.name});
-        pc.content.push({type: "symbol", content: "="});
-        pc.content.push({type: "identifier", content: par.name});
-        pc.content.push({type: "symbol", content: ";"});
-    })
+    if(pc){
+        pc.parameters = pc.parameters.concat(parametros);
+        parametros.forEach((par) => {
+            pc.content.push({type: "identifier", content: "this"});
+            pc.content.push({type: "symbol", content: "."});
+            pc.content.push({type: "identifier", content: par.name});
+            pc.content.push({type: "symbol", content: "="});
+            pc.content.push({type: "identifier", content: par.name});
+            pc.content.push({type: "symbol", content: ";"});
+        })
+    }
     return parsing;
 }
 
