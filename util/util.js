@@ -805,7 +805,13 @@ const descompilarScript = (str) => {
         }
         result.content = descompilarScript(tmp);
         if (result.content.length > 0 && result.content[0].type === "block") {
-            result.body = result.content[0].body;
+            if (!(result.content[0].body instanceof Array)) {
+                result.body = [];
+            } else {
+                result.body = result.content[0].body;
+            }
+
+
             delete result.content;
         }
         result.remainder = line.substring(1 + sintaxCheck(line, line.indexOf("{")));
@@ -1247,29 +1253,33 @@ const inyectarImportaciones = (parsing, moduleName, modulePath) => {
 const inyectarAtributos = (parsing, atributo) => {
     const clase = parsing.find((item) => item.type === "class");
     let body = clase.body;
-    const pc = body.findIndex((element) => element.type === "constructor");
     const decompilacion = descompilarScript(atributo);
-
-    if (pc !== -1) {
-        for (let index = 0; index < decompilacion.length; index++) {
-            const element = decompilacion[index];
-            body.splice(pc + index, 0, element);
-        }
-
-    } else {
-        let pb = body.findIndex(e => e.type === "block");
-        while (pb > 0 && !(body[pb].type === "symbol" && body[pb].content === ";")) pb--;
-        if (pb === -1) {
-            for (const item of decompilacion) {
-                body.push(item) ;
-            }
-        } else {
+    if (body.length>0) {
+        const pc = body.findIndex((element) => element.type === "constructor");
+        if (pc !== -1) {
             for (let index = 0; index < decompilacion.length; index++) {
                 const element = decompilacion[index];
-                body.splice(pb + 1 + index, 0, element);
+                body.splice(pc + index, 0, element);
             }
-        }
+        } else {
+            let pb = body.findIndex(e => e.type === "block");
+            while (pb > 0 && !(body[pb].type === "symbol" && body[pb].content === ";")) pb--;
+            if (pb === -1) {
+                for (const item of decompilacion) {
+                    body.push(item);
+                }
+            } else {
+                for (let index = 0; index < decompilacion.length; index++) {
+                    const element = decompilacion[index];
+                    body.splice(pb + 1 + index, 0, element);
+                }
+            }
 
+        }
+    }else{
+        for (const item of decompilacion) {
+            body.push(item);
+        }
     }
     return parsing;
 }
