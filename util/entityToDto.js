@@ -80,7 +80,7 @@ function crearDto(entity) {
 }
 
 // Esta función me crea el read DTO...
-function crearReadDto(entity) {
+function crearReadDto(entity, newCrudDto) {
     dto = [];
     importaciones = [];
     swagger = [];
@@ -102,7 +102,7 @@ function crearReadDto(entity) {
                     nombreDto = `read-${nombre}.dto.ts`;
                 }
 
-                if (esNomenclador) {
+                if (newCrudDto.esNomenclador) {
                     parametros.push('nombre: string, descripcion: string');
                 }
                 if (!esNomenclador) {
@@ -122,8 +122,8 @@ function crearReadDto(entity) {
                         dto.push(entity.attributes[i].name + ": ReadNomencladorDto[];");
                         parametros.push(entity.attributes[i].name + ": ReadNomencladorDto[]");
                     } else {
-                        dto.push(entity.attributes[i].atributo + ": ReadNomencladorDto;");
-                        parametros.push(entity.attributes[i].atributo + ": ReadNomencladorDto");
+                        dto.push(entity.attributes[i].name + ": ReadNomencladorDto;");
+                        parametros.push(entity.attributes[i].name + ": ReadNomencladorDto");
                     }
                 } else {
                     if (entity.attributes[i].hasOwnProperty('relation') && entity.attributes[i].relation.includes('ManyToMany')) {
@@ -165,12 +165,12 @@ const generarDto = (dir) => {
     return crearDto(entity);
 }
 
-const generarReadDto = (dir) => {
+const generarReadDto = (dir, newCrudDto) => {
     const lrs = new LineReaderSync(dir);
     let lineas = lrs.toLines();
     const parse = descompilarScript(lineas.join(''));
     const entity = parse.find((item) => item.type === 'class');
-    return crearReadDto(entity);
+    return crearReadDto(entity, newCrudDto);
 }
 
 module.exports = {generarDto, generarReadDto};
