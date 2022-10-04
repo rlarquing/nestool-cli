@@ -143,8 +143,8 @@ async createMultiple(@GetUser() user: UserEntity, @Body() create$nameDto: Create
 @ApiResponse({status: 500, description: 'Error interno del servidor.'})
 @ApiResponse({status: 400, description: 'Solicitud con errores.',type: BadRequestDto})
 @Servicio($nServicio, 'importar')
-async importar(@GetUser() user: UserEntity, @Body() create$nameDto: Create$nameDto[]): Promise<ResponseDto[]> {
-    return await super.importar(user, create$nameDto);
+async import(@GetUser() user: UserEntity, @Body() create$nameDto: Create$nameDto[]): Promise<ResponseDto[]> {
+    return await super.import(user, create$nameDto);
 }
 
 @Patch('/:id')
