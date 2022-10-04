@@ -3,7 +3,6 @@ import {$nameService} from '../../core/service';
 import {GetUser, Servicio} from "../decorator";
 import {RolType} from "../../shared/enum";
 import {AuthGuard} from "@nestjs/passport";
-import { RolGuard } from '../guard';
 import {$nameEntity, UserEntity} from "../../persistence/entity";
 import {ConfigService} from "@nestjs/config";
 import { ApiBearerAuth,
